@@ -66,7 +66,8 @@
 
     input[type="text"],
     input[type="number"],
-    select {
+    select,
+    textarea {
       width: 100%;
       padding: 12px;
       border: 2px solid #e0e0e0;
@@ -74,11 +75,13 @@
       font-size: 0.95rem;
       transition: all 0.3s;
       max-width: 100%;
+      background: #fff;
     }
 
     input[type="text"]:focus,
     input[type="number"]:focus,
-    select:focus {
+    select:focus,
+    textarea:focus {
       outline: none;
       border-color: #667eea;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -100,11 +103,12 @@
       display: flex;
       gap: 10px;
       margin-top: 25px;
+      flex-wrap: wrap;
     }
 
     button {
       flex: 1;
-      padding: 14px 24px;
+      padding: 14px 18px;
       border: none;
       border-radius: 8px;
       font-size: 1rem;
@@ -112,6 +116,7 @@
       cursor: pointer;
       transition: all 0.3s;
       touch-action: manipulation;
+      min-width: 160px;
     }
 
     .btn-primary {
@@ -129,26 +134,30 @@
     .btn-success { background: #28a745; color: white; }
     .btn-success:hover { background: #218838; }
 
-    .output-box {
-      background: white;
+    .btn-light { background: #e9ecef; color: #333; }
+    .btn-light:hover { background: #dde2e6; }
+
+    .output-editor {
+      background: #fff;
       border: 2px solid #667eea;
       border-radius: 12px;
-      padding: 16px;
-      min-height: 150px;
+      padding: 12px;
+      min-height: 170px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-size: 0.95rem;
       line-height: 1.6;
       color: #333;
-      position: relative;
 
       /* 長文でページが横に伸びないようにする */
       overflow-x: auto;
       overflow-y: auto;
-      max-height: 240px;
+      max-height: 260px;
       white-space: pre-wrap;
       overflow-wrap: anywhere;
       word-break: break-word;
       -webkit-overflow-scrolling: touch;
+
+      resize: vertical;
     }
 
     .preset-list {
@@ -200,12 +209,12 @@
       background: #28a745;
       color: white;
       padding: 15px 25px;
-      border-radius: 8px;
+      border-radius: 10px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.3);
       display: none;
       z-index: 1000;
       animation: slideIn 0.3s;
-      max-width: min(420px, calc(100vw - 40px));
+      max-width: min(520px, calc(100vw - 40px));
       line-height: 1.4;
     }
     .toast.error { background: #dc3545; }
@@ -234,6 +243,80 @@
       white-space: nowrap;
     }
 
+    .pill-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .pill {
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: #fff;
+      border: 2px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pill input[type="radio"] { width: 18px; height: 18px; }
+    .pill strong { font-size: 0.9rem; }
+
+    .divider {
+      height: 1px;
+      background: #dde2e6;
+      margin: 18px 0;
+      border-radius: 999px;
+    }
+
+    /* Copy失敗時の手動コピー案内バー */
+    .copy-helper {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      width: min(920px, calc(100vw - 24px));
+      background: rgba(20, 20, 20, 0.92);
+      color: #fff;
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      z-index: 1200;
+      display: none;
+    }
+
+    .copy-helper .row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .copy-helper .title {
+      font-weight: 800;
+      margin-bottom: 4px;
+      font-size: 0.95rem;
+    }
+    .copy-helper .desc {
+      opacity: 0.95;
+      line-height: 1.35;
+      font-size: 0.9rem;
+    }
+
+    .copy-helper button {
+      flex: none;
+      min-width: auto;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+      border-radius: 10px;
+      background: #fff;
+      color: #111;
+    }
+    .copy-helper button:hover { background: #f1f3f5; }
+
     @media (max-width: 1024px) {
       .main-content { grid-template-columns: 1fr; }
     }
@@ -245,7 +328,8 @@
       body { padding: 10px; }
       .main-content { padding: 15px; gap: 15px; }
       .section { padding: 15px; }
-      .output-box { max-height: 300px; }
+      .output-editor { max-height: 320px; }
+      button { min-width: 100%; }
     }
   </style>
 </head>
@@ -364,12 +448,24 @@
           </div>
         </div>
 
+        <!-- RAW 表記切替（--style raw / --raw） -->
         <div class="form-group">
-          <div class="checkbox-group">
-            <input type="checkbox" id="raw" />
-            <label for="raw" style="margin-bottom: 0;">RAWモード / --style raw</label>
+          <label>RAW表記（切替）</label>
+          <div class="pill-row" role="radiogroup" aria-label="RAW表記切替">
+            <label class="pill" for="rawStyle">
+              <input type="radio" name="rawMode" id="rawStyle" value="style" checked />
+              <strong>--style raw</strong>
+            </label>
+            <label class="pill" for="rawRaw">
+              <input type="radio" name="rawMode" id="rawRaw" value="raw" />
+              <strong>--raw</strong>
+            </label>
           </div>
-          <div class="small-text">Midjourney側で <code>--raw</code> 表記に自動変換される場合があります</div>
+          <div class="checkbox-group" style="margin-top: 10px;">
+            <input type="checkbox" id="raw" />
+            <label for="raw" style="margin-bottom: 0;">RAWモードを有効化</label>
+          </div>
+          <div class="small-text">Midjourney側で自動変換される場合があります（どちらでもOK）。</div>
         </div>
 
         <div class="form-group">
@@ -390,6 +486,8 @@
           <div class="small-text">キャラクター参照画像のURL</div>
         </div>
 
+        <div class="divider"></div>
+
         <div class="button-group">
           <button class="btn-primary" type="button" id="btnGenerate">✨ Generate</button>
           <button class="btn-success" type="button" id="btnSave">💾 Save</button>
@@ -398,10 +496,19 @@
 
       <!-- 右側：出力とプリセット -->
       <div class="section">
-        <h2>🎯 生成されたプロンプト</h2>
-        <div class="output-box" id="output">ここに生成されたプロンプトが表示されます...</div>
+        <h2>🎯 生成されたプロンプト（編集OK）</h2>
+
+        <!-- 出力＝編集可能（D仕様） -->
+        <textarea class="output-editor" id="outputEditor" spellcheck="false">ここに生成されたプロンプトが表示されます...</textarea>
+
         <div class="button-group">
           <button class="btn-secondary" type="button" id="btnCopy">📋 Copy to Clipboard</button>
+          <button class="btn-light" type="button" id="btnRebuild">🧩 Rebuild from Settings</button>
+        </div>
+
+        <div class="small-text" style="margin-top: 8px;">
+          ※ Copyはこの編集欄の内容をコピーします。<br>
+          ※ Rebuildは左の設定から再生成して、この欄を上書きします。
         </div>
 
         <h2 style="margin-top: 30px;">📚 プリセット</h2>
@@ -411,6 +518,17 @@
   </div>
 
   <div class="toast" id="toast">コピーしました！</div>
+
+  <!-- Copy失敗時の手動コピー案内（固定バー） -->
+  <div class="copy-helper" id="copyHelper" aria-live="polite">
+    <div class="row">
+      <div>
+        <div class="title">コピーできませんでした（iPhone/Safari対策）</div>
+        <div class="desc">出力欄を長押し → 全選択 → コピー を行ってください。今、出力欄を自動で選択状態にしています。</div>
+      </div>
+      <button type="button" id="btnCopyHelpClose">閉じる</button>
+    </div>
+  </div>
 
   <script>
     // サンプルプリセット（20個）
@@ -697,34 +815,80 @@
       }
     ];
 
+    // ===== 状態管理キー =====
+    const KEY_PRESETS = 'mjPresets';
+    const KEY_LAST_STATE = 'mjLastState';
+    const KEY_EDITOR = 'mjOutputEditorText';
+    const KEY_RAW_MODE = 'mjRawMode'; // "style" | "raw"
+
     // 初期化
     document.addEventListener('DOMContentLoaded', function () {
       loadPresets();
       displayPresets();
       restoreLastState();
-      setupAutoSave();
+      restoreEditorText();
       setupButtons();
       setupARCustomToggle();
+      setupAutoSave();
+
+      // 初回も一回生成しておく（テーマ等が空でもOK）
+      generatePrompt({ silentToast: true });
     });
 
     function setupButtons() {
-      document.getElementById('btnGenerate').addEventListener('click', generatePrompt);
+      document.getElementById('btnGenerate').addEventListener('click', () => generatePrompt());
       document.getElementById('btnSave').addEventListener('click', savePreset);
       document.getElementById('btnCopy').addEventListener('click', copyToClipboard);
+
+      document.getElementById('btnRebuild').addEventListener('click', () => {
+        generatePrompt({ overwriteEditor: true, fromRebuild: true });
+        showToast('左の設定から再生成しました');
+      });
+
+      document.getElementById('btnCopyHelpClose').addEventListener('click', hideCopyHelper);
+
+      // RAW表記ラジオ
+      const rawStyle = document.getElementById('rawStyle');
+      const rawRaw = document.getElementById('rawRaw');
+
+      const storedMode = localStorage.getItem(KEY_RAW_MODE);
+      if (storedMode === 'raw') rawRaw.checked = true;
+      else rawStyle.checked = true;
+
+      rawStyle.addEventListener('change', () => {
+        localStorage.setItem(KEY_RAW_MODE, 'style');
+        saveCurrentState();
+        generatePrompt({ silentToast: true });
+      });
+      rawRaw.addEventListener('change', () => {
+        localStorage.setItem(KEY_RAW_MODE, 'raw');
+        saveCurrentState();
+        generatePrompt({ silentToast: true });
+      });
+
+      // エディタ編集：保存（軽めのdebounce）
+      const editor = document.getElementById('outputEditor');
+      let t = null;
+      editor.addEventListener('input', () => {
+        if (t) clearTimeout(t);
+        t = setTimeout(() => {
+          saveEditorText();
+        }, 250);
+      });
     }
 
     // プリセットをlocalStorageから読み込み、なければサンプルを使用
     function loadPresets() {
-      const stored = localStorage.getItem('mjPresets');
+      const stored = localStorage.getItem(KEY_PRESETS);
       if (!stored) {
-        localStorage.setItem('mjPresets', JSON.stringify(samplePresets));
+        localStorage.setItem(KEY_PRESETS, JSON.stringify(samplePresets));
       }
     }
 
     // プリセット一覧を表示
     function displayPresets() {
       const presetList = document.getElementById('presetList');
-      const stored = localStorage.getItem('mjPresets');
+      const stored = localStorage.getItem(KEY_PRESETS);
       const presets = stored ? JSON.parse(stored) : samplePresets;
 
       presetList.innerHTML = '';
@@ -768,7 +932,7 @@
       arSelect.addEventListener('change', () => {
         sync();
         saveCurrentState();
-        generatePrompt();
+        generatePrompt({ silentToast: true });
       });
 
       sync();
@@ -777,7 +941,7 @@
     // プリセットを読み込み
     // 仕様：プリセット変更時にsref/cref/seedは基本維持（消えない）
     function loadPreset(index) {
-      const stored = localStorage.getItem('mjPresets');
+      const stored = localStorage.getItem(KEY_PRESETS);
       const presets = stored ? JSON.parse(stored) : samplePresets;
       const preset = presets[index];
 
@@ -821,13 +985,21 @@
       const wrap = document.getElementById('arCustomWrap');
       wrap.style.display = (arSelect.value === 'custom') ? 'block' : 'none';
 
-      generatePrompt();
+      // 生成 → エディタ上書き（プリセット適用なので上書きが自然）
+      generatePrompt({ overwriteEditor: true, silentToast: true });
+
       saveCurrentState();
       showToast(`"${preset.name}" を読み込みました`);
     }
 
-    // プロンプト生成
-    function generatePrompt() {
+    // ===== RAW表記 =====
+    function getRawMode() {
+      const stored = localStorage.getItem(KEY_RAW_MODE);
+      return stored === 'raw' ? 'raw' : 'style';
+    }
+
+    // ===== プロンプト生成（左設定 → 文字列） =====
+    function buildPromptString() {
       const theme = document.getElementById('theme').value.trim();
       const personTemplate = document.getElementById('personTemplate').value;
       const composition = document.getElementById('composition').value;
@@ -856,7 +1028,7 @@
       const stylize = document.getElementById('stylize').value;
       const chaos = document.getElementById('chaos').value;
       const quality = document.getElementById('quality').value;
-      const raw = document.getElementById('raw').checked;
+      const rawEnabled = document.getElementById('raw').checked;
       const seed = document.getElementById('seed').value;
       const sref = document.getElementById('sref').value.trim();
       const cref = document.getElementById('cref').value.trim();
@@ -866,23 +1038,53 @@
       if (stylize !== '' && stylize !== null && stylize !== undefined) params.push(`--stylize ${stylize}`);
       if (chaos && chaos != 0) params.push(`--chaos ${chaos}`);
       if (quality) params.push(`--quality ${quality}`);
-      if (raw) params.push(`--style raw`);
+
+      if (rawEnabled) {
+        const mode = getRawMode();
+        params.push(mode === 'raw' ? `--raw` : `--style raw`);
+      }
+
       if (seed) params.push(`--seed ${seed}`);
       if (sref) params.push(`--sref ${sref}`);
       if (cref) params.push(`--cref ${cref}`);
 
       const fullPrompt = prompt + (params.length > 0 ? ' ' + params.join(' ') : '');
-      document.getElementById('output').textContent =
-        fullPrompt || 'プロンプトを生成するには、少なくともテーマを入力してください。';
+      return fullPrompt || 'プロンプトを生成するには、少なくともテーマを入力してください。';
+    }
+
+    // プロンプト生成（エディタへ反映）
+    // overwriteEditor: true -> エディタ上書き
+    function generatePrompt(opts = {}) {
+      const { overwriteEditor = true, silentToast = false } = opts;
+
+      const fullPrompt = buildPromptString();
+      const editor = document.getElementById('outputEditor');
+
+      if (overwriteEditor) {
+        editor.value = fullPrompt;
+        saveEditorText();
+      } else {
+        // 上書きしない場合：空のときだけ入れる
+        if (!editor.value || editor.value === 'ここに生成されたプロンプトが表示されます...') {
+          editor.value = fullPrompt;
+          saveEditorText();
+        }
+      }
 
       // 生成のたびに保存（更新ボタン/リロード耐性）
       saveCurrentState();
+
+      if (!silentToast && fullPrompt && fullPrompt !== 'プロンプトを生成するには、少なくともテーマを入力してください。') {
+        // 必要なら通知（うるさければ silentToast を使う）
+      }
     }
 
     // ===== Copy: iPhone/Safari対策（失敗時に手動コピー案内） =====
     async function copyToClipboard() {
-      const outputEl = document.getElementById('output');
-      const text = outputEl.textContent;
+      hideCopyHelper();
+
+      const editor = document.getElementById('outputEditor');
+      const text = (editor.value || '').trim();
 
       if (!text || text === 'ここに生成されたプロンプトが表示されます...' ||
           text === 'プロンプトを生成するには、少なくともテーマを入力してください。') {
@@ -890,15 +1092,13 @@
         return;
       }
 
-      // 失敗時に手動コピーしやすくする：Rangeで選択状態にする
-      function selectOutputText() {
+      // 失敗時に手動コピーしやすくする：textareaの全文選択
+      function selectEditorText() {
         try {
-          const range = document.createRange();
-          range.selectNodeContents(outputEl);
-          const sel = window.getSelection();
-          sel.removeAllRanges();
-          sel.addRange(range);
-          outputEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          editor.focus();
+          editor.select();
+          editor.setSelectionRange(0, editor.value.length); // iOS対策
+          editor.scrollIntoView({ block: 'center', behavior: 'smooth' });
         } catch (_) {}
       }
 
@@ -913,28 +1113,27 @@
 
       // 2) execCommand fallback
       try {
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        ta.setAttribute('readonly', '');
-        ta.style.position = 'fixed';
-        ta.style.left = '-9999px';
-        ta.style.top = '0';
-        document.body.appendChild(ta);
-        ta.focus();
-        ta.select();
-
+        selectEditorText();
         const ok = document.execCommand('copy');
-        document.body.removeChild(ta);
-
         if (ok) {
           showToast('クリップボードにコピーしました！');
           return;
         }
       } catch (_) {}
 
-      // 3) manual 안내
-      selectOutputText();
-      showToast('コピーできませんでした。出力欄を長押し→全選択→コピーしてください', 'error');
+      // 3) manual 안내（固定バー表示 + 自動選択）
+      selectEditorText();
+      showCopyHelper();
+      showToast('コピーできませんでした。手動でコピーしてください', 'error');
+    }
+
+    function showCopyHelper() {
+      const el = document.getElementById('copyHelper');
+      el.style.display = 'block';
+    }
+    function hideCopyHelper() {
+      const el = document.getElementById('copyHelper');
+      el.style.display = 'none';
     }
 
     // プリセット保存
@@ -969,15 +1168,16 @@
         chaos: parseInt(document.getElementById('chaos').value, 10),
         quality: parseFloat(document.getElementById('quality').value),
         raw: document.getElementById('raw').checked,
+        rawMode: getRawMode(),
         seed: document.getElementById('seed').value,
         sref: document.getElementById('sref').value,
         cref: document.getElementById('cref').value
       };
 
-      const stored = localStorage.getItem('mjPresets');
+      const stored = localStorage.getItem(KEY_PRESETS);
       const presets = stored ? JSON.parse(stored) : samplePresets;
       presets.unshift(preset);
-      localStorage.setItem('mjPresets', JSON.stringify(presets));
+      localStorage.setItem(KEY_PRESETS, JSON.stringify(presets));
 
       displayPresets();
       showToast(`"${name}" を保存しました`);
@@ -991,6 +1191,22 @@
       toast.textContent = message;
       toast.style.display = 'block';
       setTimeout(() => { toast.style.display = 'none'; }, 3500);
+    }
+
+    // ===== エディタ保存/復元 =====
+    function saveEditorText() {
+      const editor = document.getElementById('outputEditor');
+      localStorage.setItem(KEY_EDITOR, editor.value || '');
+    }
+
+    function restoreEditorText() {
+      const stored = localStorage.getItem(KEY_EDITOR);
+      if (!stored) return;
+      const editor = document.getElementById('outputEditor');
+      // 初期文言のままなら上書き、すでに何かあれば触らない
+      if (!editor.value || editor.value === 'ここに生成されたプロンプトが表示されます...') {
+        editor.value = stored;
+      }
     }
 
     // 現在の状態を保存（localStorage）
@@ -1009,16 +1225,17 @@
         chaos: document.getElementById('chaos').value,
         quality: document.getElementById('quality').value,
         raw: document.getElementById('raw').checked,
+        rawMode: getRawMode(),
         seed: document.getElementById('seed').value,
         sref: document.getElementById('sref').value,
         cref: document.getElementById('cref').value
       };
-      localStorage.setItem('mjLastState', JSON.stringify(currentState));
+      localStorage.setItem(KEY_LAST_STATE, JSON.stringify(currentState));
     }
 
     // 前回の状態を復元
     function restoreLastState() {
-      const stored = localStorage.getItem('mjLastState');
+      const stored = localStorage.getItem(KEY_LAST_STATE);
       if (!stored) return;
 
       try {
@@ -1046,10 +1263,14 @@
         document.getElementById('sref').value = state.sref || '';
         document.getElementById('cref').value = state.cref || '';
 
-        // 復元後にプロンプト生成
-        if (state.theme || state.personTemplate || state.sref || state.cref) {
-          generatePrompt();
-        }
+        // RAWモード復元
+        if (state.rawMode) localStorage.setItem(KEY_RAW_MODE, state.rawMode);
+
+        // ラジオ状態反映
+        const mode = getRawMode();
+        document.getElementById('rawStyle').checked = (mode === 'style');
+        document.getElementById('rawRaw').checked = (mode === 'raw');
+
       } catch (e) {
         console.error('状態の復元に失敗しました:', e);
       }
@@ -1070,14 +1291,17 @@
         el.addEventListener('input', () => {
           saveCurrentState();
           // テキスト入力ごとに出力を追従させたいなら有効化
-          // generatePrompt();
+          // generatePrompt({ silentToast: true });
         });
 
         el.addEventListener('change', () => {
           saveCurrentState();
-          generatePrompt(); // select/checkboxは即反映
+          generatePrompt({ silentToast: true }); // select/checkboxは即反映
         });
       });
+
+      // 出力エディタも常時保存（すでにdebounce済み）
+      // ここでは特に追加しない
     }
   </script>
 </body>
