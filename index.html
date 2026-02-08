@@ -205,7 +205,10 @@
       display: none;
       z-index: 1000;
       animation: slideIn 0.3s;
+      max-width: min(420px, calc(100vw - 40px));
+      line-height: 1.4;
     }
+    .toast.error { background: #dc3545; }
 
     @keyframes slideIn {
       from { transform: translateX(400px); opacity: 0; }
@@ -366,7 +369,7 @@
             <input type="checkbox" id="raw" />
             <label for="raw" style="margin-bottom: 0;">RAWモード / --style raw</label>
           </div>
-          <div class="small-text">よりリアルで写真的な結果</div>
+          <div class="small-text">Midjourney側で <code>--raw</code> 表記に自動変換される場合があります</div>
         </div>
 
         <div class="form-group">
@@ -797,6 +800,12 @@
         document.getElementById('ar').value = '9:16';
       }
 
+      // custom ar 値（保存されてる場合だけ復元）
+      if (preset.ar === 'custom' && preset.arCustom && isValidAR(preset.arCustom)) {
+        document.getElementById('ar').value = 'custom';
+        document.getElementById('arCustom').value = preset.arCustom;
+      }
+
       document.getElementById('stylize').value = preset.stylize ?? 100;
       document.getElementById('chaos').value = preset.chaos ?? 0;
       document.getElementById('quality').value = preset.quality ?? 1;
@@ -870,35 +879,62 @@
       saveCurrentState();
     }
 
-    // クリップボードにコピー
+    // ===== Copy: iPhone/Safari対策（失敗時に手動コピー案内） =====
     async function copyToClipboard() {
-      const output = document.getElementById('output').textContent;
-      if (!output || output === 'ここに生成されたプロンプトが表示されます...' ||
-          output === 'プロンプトを生成するには、少なくともテーマを入力してください。') {
-        showToast('コピーするプロンプトがありません');
+      const outputEl = document.getElementById('output');
+      const text = outputEl.textContent;
+
+      if (!text || text === 'ここに生成されたプロンプトが表示されます...' ||
+          text === 'プロンプトを生成するには、少なくともテーマを入力してください。') {
+        showToast('コピーするプロンプトがありません', 'error');
         return;
       }
 
+      // 失敗時に手動コピーしやすくする：Rangeで選択状態にする
+      function selectOutputText() {
+        try {
+          const range = document.createRange();
+          range.selectNodeContents(outputEl);
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+          outputEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        } catch (_) {}
+      }
+
+      // 1) Clipboard API
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(output);
-        } else {
-          // フォールバック（iOS含む）
-          const ta = document.createElement('textarea');
-          ta.value = output;
-          ta.style.position = 'fixed';
-          ta.style.left = '-9999px';
-          ta.style.top = '0';
-          document.body.appendChild(ta);
-          ta.focus();
-          ta.select();
-          document.execCommand('copy');
-          document.body.removeChild(ta);
+          await navigator.clipboard.writeText(text);
+          showToast('クリップボードにコピーしました！');
+          return;
         }
-        showToast('クリップボードにコピーしました！');
-      } catch (err) {
-        alert('コピーに失敗しました: ' + err);
-      }
+      } catch (_) {}
+
+      // 2) execCommand fallback
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        ta.style.top = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+
+        if (ok) {
+          showToast('クリップボードにコピーしました！');
+          return;
+        }
+      } catch (_) {}
+
+      // 3) manual 안내
+      selectOutputText();
+      showToast('コピーできませんでした。出力欄を長押し→全選択→コピーしてください', 'error');
     }
 
     // プリセット保存
@@ -915,7 +951,6 @@
           arCustom = custom.trim();
           ar = 'custom';
         } else {
-          // invalidなら custom 保存はしない（arは空で保存しないよりマシに固定）
           ar = '9:16';
         }
       }
@@ -948,17 +983,18 @@
       showToast(`"${name}" を保存しました`);
     }
 
-    // トースト表示
-    function showToast(message) {
+    // トースト表示（success / error）
+    function showToast(message, type = 'success') {
       const toast = document.getElementById('toast');
+      toast.classList.remove('error');
+      if (type === 'error') toast.classList.add('error');
       toast.textContent = message;
       toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 2500);
+      setTimeout(() => { toast.style.display = 'none'; }, 3500);
     }
 
     // 現在の状態を保存（localStorage）
     function saveCurrentState() {
-      // ar（custom対応）
       const arVal = document.getElementById('ar').value;
       const currentState = {
         theme: document.getElementById('theme').value,
@@ -1033,7 +1069,7 @@
 
         el.addEventListener('input', () => {
           saveCurrentState();
-          // 入力と同時に出力も追従させたい場合は有効化
+          // テキスト入力ごとに出力を追従させたいなら有効化
           // generatePrompt();
         });
 
