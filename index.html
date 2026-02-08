@@ -7,14 +7,12 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    /* ✅ 横にはみ出し禁止（最重要） */
-    html, body { overflow-x: hidden; }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       padding: 20px;
+      overflow-x: hidden; /* 横スクロール抑止（長文URLでも崩さない） */
     }
 
     .container {
@@ -47,7 +45,7 @@
       background: #f8f9fa;
       padding: 25px;
       border-radius: 15px;
-      min-width: 0; /* ✅ iOS/Safariの横はみ出し対策 */
+      overflow: hidden; /* セクション内での横はみ出しを抑止 */
     }
 
     .section h2 {
@@ -70,32 +68,49 @@
 
     input[type="text"],
     input[type="number"],
-    select,
-    textarea {
+    select {
       width: 100%;
-      max-width: 100%;
       padding: 12px;
       border: 2px solid #e0e0e0;
       border-radius: 8px;
       font-size: 0.95rem;
       transition: all 0.3s;
-      overflow-x: hidden; /* ✅ 文字で横スクロールしない */
+      max-width: 100%;
+    }
+
+    /* 長いURLでも入力欄が横に伸びないようにする */
+    input[type="text"] {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     input[type="text"]:focus,
     input[type="number"]:focus,
-    select:focus,
-    textarea:focus {
+    select:focus {
       outline: none;
       border-color: #667eea;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
-    .checkbox-group { display: flex; align-items: center; gap: 10px; }
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-    input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
+    input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
 
-    .button-group { display: flex; gap: 10px; margin-top: 25px; }
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 25px;
+    }
 
     button {
       flex: 1;
@@ -106,7 +121,6 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s;
-      max-width: 100%;
     }
 
     .btn-primary {
@@ -124,7 +138,7 @@
     .btn-success { background: #28a745; color: white; }
     .btn-success:hover { background: #218838; }
 
-    /* ✅ 出力欄：横に伸びない＋長くなったら中だけ縦スクロール */
+    /* 出力欄：長文は中で縦スクロール。横は折り返す */
     .output-box {
       background: white;
       border: 2px solid #667eea;
@@ -135,23 +149,23 @@
       font-size: 0.95rem;
       line-height: 1.6;
       color: #333;
-      max-width: 100%;
-      max-height: 220px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      white-space: pre-wrap;
       word-break: break-word;
       overflow-wrap: anywhere;
+      white-space: pre-wrap;
+      overflow-x: hidden;
+      overflow-y: auto;
+      max-height: 220px;
+      position: relative;
     }
 
     .preset-list {
       max-height: 400px;
       overflow-y: auto;
+      overflow-x: hidden;
       background: white;
       border-radius: 8px;
       padding: 15px;
       margin-top: 15px;
-      -webkit-overflow-scrolling: touch;
     }
 
     .preset-item {
@@ -162,14 +176,28 @@
       cursor: pointer;
       transition: all 0.2s;
       border-left: 4px solid #667eea;
-      user-select: none;
       -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation; /* ✅ iPhoneでタップ反応改善 */
+      touch-action: manipulation; /* iPhoneでタップ反応を安定させる */
     }
-    .preset-item:hover { background: #e9ecef; transform: translateX(5px); }
 
-    .preset-item h4 { color: #667eea; margin-bottom: 5px; font-size: 0.9rem; }
-    .preset-item p { color: #666; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .preset-item:hover {
+      background: #e9ecef;
+      transform: translateX(5px);
+    }
+
+    .preset-item h4 {
+      color: #667eea;
+      margin-bottom: 5px;
+      font-size: 0.9rem;
+    }
+
+    .preset-item p {
+      color: #666;
+      font-size: 0.85rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
     .toast {
       position: fixed;
@@ -190,9 +218,15 @@
       to { transform: translateX(0); opacity: 1; }
     }
 
-    .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .param-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
 
-    @media (max-width: 1024px) { .main-content { grid-template-columns: 1fr; } }
+    @media (max-width: 1024px) {
+      .main-content { grid-template-columns: 1fr; }
+    }
 
     @media (max-width: 768px) {
       .header h1 { font-size: 1.5rem; }
@@ -201,25 +235,17 @@
       body { padding: 10px; }
       .main-content { padding: 15px; gap: 15px; }
       .section { padding: 15px; }
+      .output-box { max-height: 260px; }
     }
 
-    .small-text { font-size: 0.8rem; color: #888; margin-top: 5px; }
-
-    /* ✅ URL入力欄：横に伸びない＋長くなったら中だけ縦スクロール */
-    .url-box{
-      width: 100%;
-      min-height: 44px;
-      max-height: 140px;
-      resize: vertical;
-      overflow-y: auto;
-      overflow-x: hidden;
-      white-space: pre-wrap;
-      word-break: break-word;
-      overflow-wrap: anywhere;
-      -webkit-overflow-scrolling: touch;
+    .small-text {
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 5px;
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <div class="header">
@@ -254,7 +280,7 @@
             <label for="composition">構図 / Composition</label>
             <select id="composition">
               <option value="close-up shot">Close-up</option>
-              <option value="portrait shot">Portrait</option>
+              <option value="portrait shot" selected>Portrait</option>
               <option value="mid-body shot">Mid-body</option>
               <option value="full-body shot">Full-body</option>
             </select>
@@ -263,7 +289,7 @@
           <div class="form-group">
             <label for="angle">アングル / Angle</label>
             <select id="angle">
-              <option value="front view">Front</option>
+              <option value="front view" selected>Front</option>
               <option value="three-quarter view">Three-quarter</option>
               <option value="side view">Side</option>
               <option value="over-shoulder view">Over-shoulder</option>
@@ -274,7 +300,7 @@
         <div class="form-group">
           <label for="lighting">ライティング / Lighting</label>
           <select id="lighting">
-            <option value="soft window light">Soft Window Light</option>
+            <option value="soft window light" selected>Soft Window Light</option>
             <option value="neon rim lighting">Neon Rim Lighting</option>
             <option value="cinematic key light">Cinematic Key Light</option>
             <option value="studio beauty lighting">Studio Beauty Lighting</option>
@@ -284,7 +310,7 @@
         <div class="form-group">
           <label for="background">背景 / Background</label>
           <select id="background">
-            <option value="city night background">City Night</option>
+            <option value="city night background" selected>City Night</option>
             <option value="minimal studio background">Minimal Studio</option>
             <option value="cafe street background">Cafe Street</option>
           </select>
@@ -296,7 +322,7 @@
           <div class="form-group">
             <label for="ar">アスペクト比 / --ar</label>
             <select id="ar">
-              <option value="1:1">1:1 (正方形)</option>
+              <option value="1:1" selected>1:1 (正方形)</option>
               <option value="16:9">16:9 (横長)</option>
               <option value="9:16">9:16 (縦長)</option>
               <option value="4:3">4:3</option>
@@ -342,17 +368,16 @@
           <div class="small-text">同じシードで一貫した結果</div>
         </div>
 
-        <!-- ✅ input→textarea に変更（長いURLで横に伸びない） -->
         <div class="form-group">
           <label for="sref">スタイル参照 / --sref (オプション)</label>
-          <textarea id="sref" class="url-box" placeholder="画像URL"></textarea>
-          <div class="small-text">スタイル参照画像のURL（長くなったらこの欄の中だけ縦スクロール）</div>
+          <input type="text" id="sref" placeholder="画像URL" inputmode="url" />
+          <div class="small-text">スタイル参照画像のURL</div>
         </div>
 
         <div class="form-group">
           <label for="cref">キャラクター参照 / --cref (オプション)</label>
-          <textarea id="cref" class="url-box" placeholder="画像URL"></textarea>
-          <div class="small-text">キャラクター参照画像のURL（長くなったらこの欄の中だけ縦スクロール）</div>
+          <input type="text" id="cref" placeholder="画像URL" inputmode="url" />
+          <div class="small-text">キャラクター参照画像のURL</div>
         </div>
 
         <div class="button-group">
@@ -365,6 +390,7 @@
       <div class="section">
         <h2>🎯 生成されたプロンプト</h2>
         <div class="output-box" id="output">ここに生成されたプロンプトが表示されます...</div>
+
         <div class="button-group">
           <button class="btn-secondary" onclick="copyToClipboard()">📋 Copy to Clipboard</button>
         </div>
@@ -662,6 +688,7 @@
       }
     ];
 
+    // 初期化
     document.addEventListener('DOMContentLoaded', function() {
       loadPresets();
       displayPresets();
@@ -669,67 +696,82 @@
       setupAutoSave();
     });
 
+    // プリセットをlocalStorageから読み込み、なければサンプルを使用
     function loadPresets() {
       const stored = localStorage.getItem('mjPresets');
-      if (!stored) localStorage.setItem('mjPresets', JSON.stringify(samplePresets));
+      if (!stored) {
+        localStorage.setItem('mjPresets', JSON.stringify(samplePresets));
+      }
     }
 
+    // プリセット一覧を表示
     function displayPresets() {
       const presetList = document.getElementById('presetList');
       const stored = localStorage.getItem('mjPresets');
       const presets = stored ? JSON.parse(stored) : samplePresets;
 
       presetList.innerHTML = '';
-
       presets.forEach((preset, index) => {
         const div = document.createElement('div');
         div.className = 'preset-item';
-        div.innerHTML = `<h4>${preset.name}</h4><p>${preset.theme}</p>`;
-
-        // ✅ iPhoneでタップを取りこぼしにくいように click + touchend を両方付ける
+        div.innerHTML = `
+          <h4>${preset.name}</h4>
+          <p>${preset.theme}</p>
+        `;
+        // iPhoneのタップ反応安定（onclickよりイベントが安定する場合がある）
         div.addEventListener('click', () => loadPreset(index), { passive: true });
-        div.addEventListener('touchend', (e) => {
-          e.preventDefault(); // iOSでの「タップがスクロール扱い」になるのを抑制
-          loadPreset(index);
-        }, { passive: false });
-
         presetList.appendChild(div);
       });
     }
 
+    // プリセットを読み込み（★sref/cref/seed は「プリセットに値がある時だけ」上書き）
     function loadPreset(index) {
       const stored = localStorage.getItem('mjPresets');
       const presets = stored ? JSON.parse(stored) : samplePresets;
       const preset = presets[index];
 
-      document.getElementById('theme').value = preset.theme || '';
-      document.getElementById('personTemplate').value = preset.personTemplate || '';
-      document.getElementById('composition').value = preset.composition || 'portrait shot';
-      document.getElementById('angle').value = preset.angle || 'front view';
-      document.getElementById('lighting').value = preset.lighting || 'soft window light';
-      document.getElementById('background').value = preset.background || 'minimal studio background';
-      document.getElementById('ar').value = preset.ar || '1:1';
+      // 現在の入力（sref/cref/seed）を退避
+      const currentSeed = document.getElementById('seed').value;
+      const currentSref = document.getElementById('sref').value;
+      const currentCref = document.getElementById('cref').value;
+
+      // いつも上書きしてOKな項目
+      document.getElementById('theme').value = preset.theme ?? '';
+      document.getElementById('personTemplate').value = preset.personTemplate ?? '';
+      document.getElementById('composition').value = preset.composition ?? 'portrait shot';
+      document.getElementById('angle').value = preset.angle ?? 'front view';
+      document.getElementById('lighting').value = preset.lighting ?? 'soft window light';
+      document.getElementById('background').value = preset.background ?? 'minimal studio background';
+      document.getElementById('ar').value = preset.ar ?? '1:1';
       document.getElementById('stylize').value = preset.stylize ?? 100;
       document.getElementById('chaos').value = preset.chaos ?? 0;
       document.getElementById('quality').value = preset.quality ?? 1;
       document.getElementById('raw').checked = !!preset.raw;
-      document.getElementById('seed').value = preset.seed || '';
-      document.getElementById('sref').value = preset.sref || '';
-      document.getElementById('cref').value = preset.cref || '';
+
+      // ★ここがポイント：プリセットに値がある時だけ上書き。無いなら維持
+      document.getElementById('seed').value =
+        (preset.seed ?? '').toString().trim() !== '' ? preset.seed : currentSeed;
+
+      document.getElementById('sref').value =
+        (preset.sref ?? '').toString().trim() !== '' ? preset.sref : currentSref;
+
+      document.getElementById('cref').value =
+        (preset.cref ?? '').toString().trim() !== '' ? preset.cref : currentCref;
 
       generatePrompt();
       showToast(`"${preset.name}" を読み込みました`);
-      saveCurrentState();
     }
 
+    // プロンプト生成
     function generatePrompt() {
-      const theme = document.getElementById('theme').value.trim();
-      const personTemplate = document.getElementById('personTemplate').value.trim();
-      const composition = document.getElementById('composition').value.trim();
-      const angle = document.getElementById('angle').value.trim();
-      const lighting = document.getElementById('lighting').value.trim();
-      const background = document.getElementById('background').value.trim();
+      const theme = document.getElementById('theme').value;
+      const personTemplate = document.getElementById('personTemplate').value;
+      const composition = document.getElementById('composition').value;
+      const angle = document.getElementById('angle').value;
+      const lighting = document.getElementById('lighting').value;
+      const background = document.getElementById('background').value;
 
+      // プロンプト本文を構築
       let promptParts = [];
       if (theme) promptParts.push(theme);
       if (personTemplate) promptParts.push(personTemplate);
@@ -740,18 +782,19 @@
 
       let prompt = promptParts.join(', ');
 
+      // パラメータを追加
       const ar = document.getElementById('ar').value;
       const stylize = document.getElementById('stylize').value;
       const chaos = document.getElementById('chaos').value;
       const quality = document.getElementById('quality').value;
       const raw = document.getElementById('raw').checked;
       const seed = document.getElementById('seed').value;
-      const sref = document.getElementById('sref').value.trim();
-      const cref = document.getElementById('cref').value.trim();
+      const sref = document.getElementById('sref').value;
+      const cref = document.getElementById('cref').value;
 
       let params = [];
       if (ar) params.push(`--ar ${ar}`);
-      if (stylize !== '' && stylize !== null && stylize !== undefined) params.push(`--stylize ${stylize}`);
+      if (stylize) params.push(`--stylize ${stylize}`);
       if (chaos && chaos != 0) params.push(`--chaos ${chaos}`);
       if (quality) params.push(`--quality ${quality}`);
       if (raw) params.push(`--style raw`);
@@ -760,46 +803,26 @@
       if (cref) params.push(`--cref ${cref}`);
 
       const fullPrompt = prompt + (params.length > 0 ? ' ' + params.join(' ') : '');
-      document.getElementById('output').textContent = fullPrompt || 'プロンプトを生成するには、少なくともテーマを入力してください。';
-
-      saveCurrentState();
+      document.getElementById('output').textContent =
+        fullPrompt || 'プロンプトを生成するには、少なくともテーマを入力してください。';
     }
 
+    // クリップボードにコピー
     function copyToClipboard() {
       const output = document.getElementById('output').textContent;
       if (output && output !== 'ここに生成されたプロンプトが表示されます...' &&
           output !== 'プロンプトを生成するには、少なくともテーマを入力してください。') {
-
-        // ✅ iOS Safariで失敗するケースがあるので fallback付き
-        if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard.writeText(output).then(() => {
-            showToast('クリップボードにコピーしました！');
-          }).catch(() => fallbackCopy(output));
-        } else {
-          fallbackCopy(output);
-        }
+        navigator.clipboard.writeText(output).then(() => {
+          showToast('クリップボードにコピーしました！');
+        }).catch(err => {
+          alert('コピーに失敗しました: ' + err);
+        });
       } else {
         showToast('コピーするプロンプトがありません');
       }
     }
 
-    function fallbackCopy(text) {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.focus();
-      ta.select();
-      try {
-        document.execCommand('copy');
-        showToast('クリップボードにコピーしました！');
-      } catch (err) {
-        alert('コピーに失敗しました: ' + err);
-      }
-      document.body.removeChild(ta);
-    }
-
+    // プリセット保存
     function savePreset() {
       const name = prompt('プリセット名を入力してください:');
       if (!name) return;
@@ -813,9 +836,9 @@
         lighting: document.getElementById('lighting').value,
         background: document.getElementById('background').value,
         ar: document.getElementById('ar').value,
-        stylize: parseInt(document.getElementById('stylize').value || '100', 10),
-        chaos: parseInt(document.getElementById('chaos').value || '0', 10),
-        quality: parseFloat(document.getElementById('quality').value || '1'),
+        stylize: parseInt(document.getElementById('stylize').value, 10),
+        chaos: parseInt(document.getElementById('chaos').value, 10),
+        quality: parseFloat(document.getElementById('quality').value),
         raw: document.getElementById('raw').checked,
         seed: document.getElementById('seed').value,
         sref: document.getElementById('sref').value,
@@ -831,13 +854,17 @@
       showToast(`"${name}" を保存しました`);
     }
 
+    // トースト表示
     function showToast(message) {
       const toast = document.getElementById('toast');
       toast.textContent = message;
       toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3000);
     }
 
+    // 現在の状態を自動保存
     function saveCurrentState() {
       const currentState = {
         theme: document.getElementById('theme').value,
@@ -853,20 +880,18 @@
         raw: document.getElementById('raw').checked,
         seed: document.getElementById('seed').value,
         sref: document.getElementById('sref').value,
-        cref: document.getElementById('cref').value,
-        // ✅ outputも保存（更新後に「表示が消えた」感をなくす）
-        output: document.getElementById('output').textContent
+        cref: document.getElementById('cref').value
       };
       localStorage.setItem('mjLastState', JSON.stringify(currentState));
     }
 
+    // 前回の状態を復元
     function restoreLastState() {
       const stored = localStorage.getItem('mjLastState');
       if (!stored) return;
 
       try {
         const state = JSON.parse(stored);
-
         document.getElementById('theme').value = state.theme || '';
         document.getElementById('personTemplate').value = state.personTemplate || '';
         document.getElementById('composition').value = state.composition || 'close-up shot';
@@ -874,18 +899,16 @@
         document.getElementById('lighting').value = state.lighting || 'soft window light';
         document.getElementById('background').value = state.background || 'city night background';
         document.getElementById('ar').value = state.ar || '1:1';
-        document.getElementById('stylize').value = state.stylize ?? 100;
-        document.getElementById('chaos').value = state.chaos ?? 0;
-        document.getElementById('quality').value = state.quality ?? 1;
-        document.getElementById('raw').checked = !!state.raw;
+        document.getElementById('stylize').value = state.stylize || 100;
+        document.getElementById('chaos').value = state.chaos || 0;
+        document.getElementById('quality').value = state.quality || 1;
+        document.getElementById('raw').checked = state.raw || false;
         document.getElementById('seed').value = state.seed || '';
         document.getElementById('sref').value = state.sref || '';
         document.getElementById('cref').value = state.cref || '';
 
-        // ✅ 以前の出力が残っていれば表示（テーマが空でも表示は残る）
-        if (state.output && state.output !== 'ここに生成されたプロンプトが表示されます...') {
-          document.getElementById('output').textContent = state.output;
-        } else if (state.theme) {
+        // 復元後にプロンプトを生成
+        if (state.theme) {
           generatePrompt();
         }
       } catch (e) {
@@ -893,38 +916,22 @@
       }
     }
 
+    // 自動保存のセットアップ
     function setupAutoSave() {
       const fields = [
-        'theme','personTemplate','composition','angle',
-        'lighting','background','ar','stylize',
-        'chaos','quality','raw','seed','sref','cref'
+        'theme', 'personTemplate', 'composition', 'angle',
+        'lighting', 'background', 'ar', 'stylize',
+        'chaos', 'quality', 'raw', 'seed', 'sref', 'cref'
       ];
 
       fields.forEach(fieldId => {
-        const el = document.getElementById(fieldId);
-        if (!el) return;
+        const element = document.getElementById(fieldId);
+        if (!element) return;
 
-        el.addEventListener('input', () => {
-          saveCurrentState();
-          // 変更のたびに表示も追従（任意だが使い勝手が上がる）
-          // themeが空の場合は「自動生成しない」ことでうっとうしさを避ける
-          if (fieldId !== 'seed' && fieldId !== 'sref' && fieldId !== 'cref') {
-            if (document.getElementById('theme').value.trim()) generatePrompt();
-          }
-        });
-
-        el.addEventListener('change', () => {
-          saveCurrentState();
-          if (document.getElementById('theme').value.trim()) generatePrompt();
-        });
+        element.addEventListener('input', saveCurrentState);
+        element.addEventListener('change', saveCurrentState);
       });
     }
-
-    // ✅ 画面回転・リサイズ時に横スクロールが出ないよう保険
-    window.addEventListener('resize', () => {
-      document.documentElement.scrollLeft = 0;
-      document.body.scrollLeft = 0;
-    }, { passive: true });
   </script>
 </body>
 </html>
