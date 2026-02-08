@@ -317,6 +317,19 @@
     }
     .copy-helper button:hover { background: #f1f3f5; }
 
+    /* ===== A案：sref/crefをtextarea化して“縦スクロール” ===== */
+    .url-textarea {
+      min-height: 48px;       /* rows=2相当の見た目 */
+      max-height: 160px;      /* 伸びすぎ防止 */
+      resize: vertical;       /* 必要なら伸ばせる */
+      overflow-y: auto;
+      overflow-x: hidden;
+      white-space: pre-wrap;  /* 折り返し */
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      -webkit-overflow-scrolling: touch;
+    }
+
     @media (max-width: 1024px) {
       .main-content { grid-template-columns: 1fr; }
     }
@@ -474,16 +487,17 @@
           <div class="small-text">同じシードで一貫した結果</div>
         </div>
 
+        <!-- ===== A案：sref/crefをtextarea化 ===== -->
         <div class="form-group">
           <label for="sref">スタイル参照 / --sref (オプション)</label>
-          <input type="text" id="sref" placeholder="画像URL" />
-          <div class="small-text">スタイル参照画像のURL</div>
+          <textarea id="sref" class="url-textarea" rows="2" placeholder="画像URL" spellcheck="false"></textarea>
+          <div class="small-text">スタイル参照画像のURL（長いURLはこの欄の中だけスクロールできます）</div>
         </div>
 
         <div class="form-group">
           <label for="cref">キャラクター参照 / --cref (オプション)</label>
-          <input type="text" id="cref" placeholder="画像URL" />
-          <div class="small-text">キャラクター参照画像のURL</div>
+          <textarea id="cref" class="url-textarea" rows="2" placeholder="画像URL" spellcheck="false"></textarea>
+          <div class="small-text">キャラクター参照画像のURL（長いURLはこの欄の中だけスクロールできます）</div>
         </div>
 
         <div class="divider"></div>
@@ -498,7 +512,7 @@
       <div class="section">
         <h2>🎯 生成されたプロンプト（編集OK）</h2>
 
-        <!-- 出力＝編集可能（D仕様） -->
+        <!-- 出力＝編集可能 -->
         <textarea class="output-editor" id="outputEditor" spellcheck="false">ここに生成されたプロンプトが表示されます...</textarea>
 
         <div class="button-group">
@@ -979,6 +993,14 @@
       document.getElementById('seed').value = (preset.seed !== undefined && preset.seed !== null && preset.seed !== '') ? preset.seed : keepSeed;
       document.getElementById('sref').value = (preset.sref !== undefined && preset.sref !== null && preset.sref !== '') ? preset.sref : keepSref;
       document.getElementById('cref').value = (preset.cref !== undefined && preset.cref !== null && preset.cref !== '') ? preset.cref : keepCref;
+
+      // RAW mode（プリセットにあれば適用）
+      if (preset.rawMode) localStorage.setItem(KEY_RAW_MODE, preset.rawMode);
+
+      // ラジオ状態反映
+      const mode = getRawMode();
+      document.getElementById('rawStyle').checked = (mode === 'style');
+      document.getElementById('rawRaw').checked = (mode === 'raw');
 
       // Custom AR UI同期
       const arSelect = document.getElementById('ar');
