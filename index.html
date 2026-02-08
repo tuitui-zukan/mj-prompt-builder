@@ -11,7 +11,7 @@
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       padding: 20px;
-      overflow-x: hidden; /* ページ自体の横スクロールは抑制 */
+      overflow-x: hidden;
     }
 
     .container {
@@ -43,7 +43,7 @@
       background: #f8f9fa;
       padding: 25px;
       border-radius: 15px;
-      min-width: 0; /* iOS/Chromiumのグリッド内溢れ対策 */
+      min-width: 0;
     }
 
     .section h2 {
@@ -148,7 +148,6 @@
       line-height: 1.6;
       color: #333;
 
-      /* 長文でページが横に伸びないようにする */
       overflow-x: auto;
       overflow-y: auto;
       max-height: 260px;
@@ -202,6 +201,33 @@
       white-space: nowrap;
     }
 
+    /* ==== Preset actions (delete) ==== */
+    .preset-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .preset-main { min-width: 0; }
+    .preset-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: none;
+    }
+    .preset-btn {
+      border: none;
+      background: #fff;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      line-height: 1;
+    }
+    .preset-btn:active { transform: scale(0.98); }
+    .preset-btn.danger { border-color: #ffc9c9; }
+
     .toast {
       position: fixed;
       top: 20px;
@@ -236,7 +262,6 @@
       margin-top: 5px;
     }
 
-    /* 長いURL入力でレイアウトが壊れないように */
     input[type="text"] {
       overflow: hidden;
       text-overflow: ellipsis;
@@ -272,7 +297,6 @@
       border-radius: 999px;
     }
 
-    /* Copy失敗時の手動コピー案内バー */
     .copy-helper {
       position: fixed;
       left: 50%;
@@ -316,19 +340,6 @@
       color: #111;
     }
     .copy-helper button:hover { background: #f1f3f5; }
-
-    /* ===== A案：sref/crefをtextarea化して“縦スクロール” ===== */
-    .url-textarea {
-      min-height: 48px;       /* rows=2相当の見た目 */
-      max-height: 160px;      /* 伸びすぎ防止 */
-      resize: vertical;       /* 必要なら伸ばせる */
-      overflow-y: auto;
-      overflow-x: hidden;
-      white-space: pre-wrap;  /* 折り返し */
-      overflow-wrap: anywhere;
-      word-break: break-word;
-      -webkit-overflow-scrolling: touch;
-    }
 
     @media (max-width: 1024px) {
       .main-content { grid-template-columns: 1fr; }
@@ -487,24 +498,26 @@
           <div class="small-text">同じシードで一貫した結果</div>
         </div>
 
-        <!-- ===== A案：sref/crefをtextarea化 ===== -->
         <div class="form-group">
           <label for="sref">スタイル参照 / --sref (オプション)</label>
-          <textarea id="sref" class="url-textarea" rows="2" placeholder="画像URL" spellcheck="false"></textarea>
-          <div class="small-text">スタイル参照画像のURL（長いURLはこの欄の中だけスクロールできます）</div>
+          <input type="text" id="sref" placeholder="画像URL" />
+          <div class="small-text">スタイル参照画像のURL</div>
         </div>
 
         <div class="form-group">
           <label for="cref">キャラクター参照 / --cref (オプション)</label>
-          <textarea id="cref" class="url-textarea" rows="2" placeholder="画像URL" spellcheck="false"></textarea>
-          <div class="small-text">キャラクター参照画像のURL（長いURLはこの欄の中だけスクロールできます）</div>
+          <input type="text" id="cref" placeholder="画像URL" />
+          <div class="small-text">キャラクター参照画像のURL</div>
         </div>
 
         <div class="divider"></div>
 
         <div class="button-group">
           <button class="btn-primary" type="button" id="btnGenerate">✨ Generate</button>
-          <button class="btn-success" type="button" id="btnSave">💾 Save</button>
+          <button class="btn-success" type="button" id="btnSave">💾 Save / Update</button>
+        </div>
+        <div class="small-text" style="margin-top:8px;">
+          ※ Saveは新規保存。すでに同名がある場合は上書き更新します。
         </div>
       </div>
 
@@ -512,7 +525,6 @@
       <div class="section">
         <h2>🎯 生成されたプロンプト（編集OK）</h2>
 
-        <!-- 出力＝編集可能 -->
         <textarea class="output-editor" id="outputEditor" spellcheck="false">ここに生成されたプロンプトが表示されます...</textarea>
 
         <div class="button-group">
@@ -525,7 +537,7 @@
           ※ Rebuildは左の設定から再生成して、この欄を上書きします。
         </div>
 
-        <h2 style="margin-top: 30px;">📚 プリセット</h2>
+        <h2 style="margin-top: 30px;">📚 プリセット（タップで読み込み / 🗑で削除）</h2>
         <div class="preset-list" id="presetList"></div>
       </div>
     </div>
@@ -533,7 +545,6 @@
 
   <div class="toast" id="toast">コピーしました！</div>
 
-  <!-- Copy失敗時の手動コピー案内（固定バー） -->
   <div class="copy-helper" id="copyHelper" aria-live="polite">
     <div class="row">
       <div>
@@ -547,286 +558,26 @@
   <script>
     // サンプルプリセット（20個）
     const samplePresets = [
-      {
-        name: "サイバーパンク ポートレート",
-        theme: "cyberpunk warrior with glowing tattoos",
-        personTemplate: "beautiful young woman, detailed face, expressive eyes",
-        composition: "portrait shot",
-        angle: "three-quarter view",
-        lighting: "neon rim lighting",
-        background: "city night background",
-        ar: "9:16",
-        stylize: 150,
-        chaos: 20,
-        quality: 1,
-        raw: true
-      },
-      {
-        name: "エレガント ファッション",
-        theme: "elegant fashion model in luxury dress",
-        personTemplate: "beautiful young woman, detailed face, expressive eyes",
-        composition: "full-body shot",
-        angle: "front view",
-        lighting: "studio beauty lighting",
-        background: "minimal studio background",
-        ar: "2:3",
-        stylize: 200,
-        chaos: 0,
-        quality: 2,
-        raw: false
-      },
-      {
-        name: "ビジネス リーダー",
-        theme: "confident CEO in modern office",
-        personTemplate: "handsome man, sharp jawline, confident expression",
-        composition: "mid-body shot",
-        angle: "three-quarter view",
-        lighting: "cinematic key light",
-        background: "minimal studio background",
-        ar: "16:9",
-        stylize: 100,
-        chaos: 0,
-        quality: 1,
-        raw: true
-      },
-      {
-        name: "ファンタジー ウィザード",
-        theme: "powerful wizard casting spell",
-        personTemplate: "elderly person, wise expression, wrinkled face",
-        composition: "portrait shot",
-        angle: "front view",
-        lighting: "cinematic key light",
-        background: "city night background",
-        ar: "1:1",
-        stylize: 250,
-        chaos: 30,
-        quality: 1,
-        raw: false
-      },
-      {
-        name: "ストリート ポートレート",
-        theme: "urban street style photographer",
-        personTemplate: "handsome man, sharp jawline, confident expression",
-        composition: "mid-body shot",
-        angle: "side view",
-        lighting: "soft window light",
-        background: "cafe street background",
-        ar: "4:3",
-        stylize: 150,
-        chaos: 10,
-        quality: 1,
-        raw: true
-      },
-      {
-        name: "ナチュラル ビューティー",
-        theme: "natural beauty in sunlight",
-        personTemplate: "beautiful young woman, detailed face, expressive eyes",
-        composition: "close-up shot",
-        angle: "three-quarter view",
-        lighting: "soft window light",
-        background: "minimal studio background",
-        ar: "3:2",
-        stylize: 100,
-        chaos: 0,
-        quality: 2,
-        raw: true
-      },
-      {
-        name: "子供の笑顔",
-        theme: "happy child playing in park",
-        personTemplate: "child, innocent eyes, playful expression",
-        composition: "portrait shot",
-        angle: "front view",
-        lighting: "soft window light",
-        background: "cafe street background",
-        ar: "1:1",
-        stylize: 100,
-        chaos: 0,
-        quality: 1,
-        raw: false
-      },
-      {
-        name: "ダークヒーロー",
-        theme: "mysterious dark hero in shadows",
-        personTemplate: "handsome man, sharp jawline, confident expression",
-        composition: "full-body shot",
-        angle: "three-quarter view",
-        lighting: "neon rim lighting",
-        background: "city night background",
-        ar: "9:16",
-        stylize: 200,
-        chaos: 40,
-        quality: 1,
-        raw: false
-      },
-      {
-        name: "エルフの戦士",
-        theme: "elven warrior with bow and arrow",
-        personTemplate: "fantasy character, unique features, mystical appearance",
-        composition: "full-body shot",
-        angle: "side view",
-        lighting: "cinematic key light",
-        background: "city night background",
-        ar: "9:16",
-        stylize: 300,
-        chaos: 20,
-        quality: 1,
-        raw: false
-      },
-      {
-        name: "カフェの少女",
-        theme: "young woman reading book in cafe",
-        personTemplate: "beautiful young woman, detailed face, expressive eyes",
-        composition: "mid-body shot",
-        angle: "over-shoulder view",
-        lighting: "soft window light",
-        background: "cafe street background",
-        ar: "16:9",
-        stylize: 150,
-        chaos: 0,
-        quality: 1,
-        raw: true
-      },
-      {
-        name: "老賢者",
-        theme: "ancient sage with wisdom in eyes",
-        personTemplate: "elderly person, wise expression, wrinkled face",
-        composition: "close-up shot",
-        angle: "front view",
-        lighting: "cinematic key light",
-        background: "minimal studio background",
-        ar: "1:1",
-        stylize: 200,
-        chaos: 10,
-        quality: 2,
-        raw: false
-      },
-      {
-        name: "アクション ヒーロー",
-        theme: "action hero in dynamic pose",
-        personTemplate: "handsome man, sharp jawline, confident expression",
-        composition: "full-body shot",
-        angle: "three-quarter view",
-        lighting: "cinematic key light",
-        background: "city night background",
-        ar: "16:9",
-        stylize: 150,
-        chaos: 30,
-        quality: 1,
-        raw: true
-      },
-      {
-        name: "魔法少女",
-        theme: "magical girl with glowing powers",
-        personTemplate: "fantasy character, unique features, mystical appearance",
-        composition: "portrait shot",
-        angle: "front view",
-        lighting: "neon rim lighting",
-        background: "city night background",
-        ar: "9:16",
-        stylize: 250,
-        chaos: 20,
-        quality: 1,
-        raw: false
-      },
-      {
-        name: "プロフェッショナル",
-        theme: "professional business portrait",
-        personTemplate: "beautiful young woman, detailed face, expressive eyes",
-        composition: "portrait shot",
-        angle: "front view",
-        lighting: "studio beauty lighting",
-        background: "minimal studio background",
-        ar: "3:2",
-        stylize: 100,
-        chaos: 0,
-        quality: 2,
-        raw: true
-      },
-      {
-        name: "サムライ",
-        theme: "samurai warrior with katana",
-        personTemplate: "handsome man, sharp jawline, confident expression",
-        composition: "full-body shot",
-        angle: "side view",
-        lighting: "cinematic key light",
-        background: "minimal studio background",
-        ar: "9:16",
-        stylize: 200,
-        chaos: 20,
-        quality: 1,
-        raw: false
-      },
-      {
-        name: "天使",
-        theme: "angel with glowing wings",
-        personTemplate: "fantasy character, unique features, mystical appearance",
-        composition: "full-body shot",
-        angle: "front view",
-        lighting: "soft window light",
-        background: "minimal studio background",
-        ar: "2:3",
-        stylize: 300,
-        chaos: 10,
-        quality: 1,
-        raw: false
-      },
-      {
-        name: "ロックスター",
-        theme: "rock star performing on stage",
-        personTemplate: "handsome man, sharp jawline, confident expression",
-        composition: "mid-body shot",
-        angle: "three-quarter view",
-        lighting: "neon rim lighting",
-        background: "city night background",
-        ar: "16:9",
-        stylize: 200,
-        chaos: 30,
-        quality: 1,
-        raw: false
-      },
-      {
-        name: "スパイ",
-        theme: "secret agent in tactical gear",
-        personTemplate: "beautiful young woman, detailed face, expressive eyes",
-        composition: "full-body shot",
-        angle: "three-quarter view",
-        lighting: "cinematic key light",
-        background: "city night background",
-        ar: "9:16",
-        stylize: 150,
-        chaos: 20,
-        quality: 1,
-        raw: true
-      },
-      {
-        name: "ドラゴンライダー",
-        theme: "dragon rider with magical armor",
-        personTemplate: "fantasy character, unique features, mystical appearance",
-        composition: "portrait shot",
-        angle: "front view",
-        lighting: "cinematic key light",
-        background: "city night background",
-        ar: "1:1",
-        stylize: 300,
-        chaos: 40,
-        quality: 1,
-        raw: false
-      },
-      {
-        name: "カフェオーナー",
-        theme: "friendly cafe owner serving coffee",
-        personTemplate: "elderly person, wise expression, wrinkled face",
-        composition: "mid-body shot",
-        angle: "over-shoulder view",
-        lighting: "soft window light",
-        background: "cafe street background",
-        ar: "4:3",
-        stylize: 100,
-        chaos: 0,
-        quality: 1,
-        raw: true
-      }
+      { name:"サイバーパンク ポートレート", theme:"cyberpunk warrior with glowing tattoos", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"portrait shot", angle:"three-quarter view", lighting:"neon rim lighting", background:"city night background", ar:"9:16", stylize:150, chaos:20, quality:1, raw:true },
+      { name:"エレガント ファッション", theme:"elegant fashion model in luxury dress", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"full-body shot", angle:"front view", lighting:"studio beauty lighting", background:"minimal studio background", ar:"2:3", stylize:200, chaos:0, quality:2, raw:false },
+      { name:"ビジネス リーダー", theme:"confident CEO in modern office", personTemplate:"handsome man, sharp jawline, confident expression", composition:"mid-body shot", angle:"three-quarter view", lighting:"cinematic key light", background:"minimal studio background", ar:"16:9", stylize:100, chaos:0, quality:1, raw:true },
+      { name:"ファンタジー ウィザード", theme:"powerful wizard casting spell", personTemplate:"elderly person, wise expression, wrinkled face", composition:"portrait shot", angle:"front view", lighting:"cinematic key light", background:"city night background", ar:"1:1", stylize:250, chaos:30, quality:1, raw:false },
+      { name:"ストリート ポートレート", theme:"urban street style photographer", personTemplate:"handsome man, sharp jawline, confident expression", composition:"mid-body shot", angle:"side view", lighting:"soft window light", background:"cafe street background", ar:"4:3", stylize:150, chaos:10, quality:1, raw:true },
+      { name:"ナチュラル ビューティー", theme:"natural beauty in sunlight", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"close-up shot", angle:"three-quarter view", lighting:"soft window light", background:"minimal studio background", ar:"3:2", stylize:100, chaos:0, quality:2, raw:true },
+      { name:"子供の笑顔", theme:"happy child playing in park", personTemplate:"child, innocent eyes, playful expression", composition:"portrait shot", angle:"front view", lighting:"soft window light", background:"cafe street background", ar:"1:1", stylize:100, chaos:0, quality:1, raw:false },
+      { name:"ダークヒーロー", theme:"mysterious dark hero in shadows", personTemplate:"handsome man, sharp jawline, confident expression", composition:"full-body shot", angle:"three-quarter view", lighting:"neon rim lighting", background:"city night background", ar:"9:16", stylize:200, chaos:40, quality:1, raw:false },
+      { name:"エルフの戦士", theme:"elven warrior with bow and arrow", personTemplate:"fantasy character, unique features, mystical appearance", composition:"full-body shot", angle:"side view", lighting:"cinematic key light", background:"city night background", ar:"9:16", stylize:300, chaos:20, quality:1, raw:false },
+      { name:"カフェの少女", theme:"young woman reading book in cafe", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"mid-body shot", angle:"over-shoulder view", lighting:"soft window light", background:"cafe street background", ar:"16:9", stylize:150, chaos:0, quality:1, raw:true },
+      { name:"老賢者", theme:"ancient sage with wisdom in eyes", personTemplate:"elderly person, wise expression, wrinkled face", composition:"close-up shot", angle:"front view", lighting:"cinematic key light", background:"minimal studio background", ar:"1:1", stylize:200, chaos:10, quality:2, raw:false },
+      { name:"アクション ヒーロー", theme:"action hero in dynamic pose", personTemplate:"handsome man, sharp jawline, confident expression", composition:"full-body shot", angle:"three-quarter view", lighting:"cinematic key light", background:"city night background", ar:"16:9", stylize:150, chaos:30, quality:1, raw:true },
+      { name:"魔法少女", theme:"magical girl with glowing powers", personTemplate:"fantasy character, unique features, mystical appearance", composition:"portrait shot", angle:"front view", lighting:"neon rim lighting", background:"city night background", ar:"9:16", stylize:250, chaos:20, quality:1, raw:false },
+      { name:"プロフェッショナル", theme:"professional business portrait", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"portrait shot", angle:"front view", lighting:"studio beauty lighting", background:"minimal studio background", ar:"3:2", stylize:100, chaos:0, quality:2, raw:true },
+      { name:"サムライ", theme:"samurai warrior with katana", personTemplate:"handsome man, sharp jawline, confident expression", composition:"full-body shot", angle:"side view", lighting:"cinematic key light", background:"minimal studio background", ar:"9:16", stylize:200, chaos:20, quality:1, raw:false },
+      { name:"天使", theme:"angel with glowing wings", personTemplate:"fantasy character, unique features, mystical appearance", composition:"full-body shot", angle:"front view", lighting:"soft window light", background:"minimal studio background", ar:"2:3", stylize:300, chaos:10, quality:1, raw:false },
+      { name:"ロックスター", theme:"rock star performing on stage", personTemplate:"handsome man, sharp jawline, confident expression", composition:"mid-body shot", angle:"three-quarter view", lighting:"neon rim lighting", background:"city night background", ar:"16:9", stylize:200, chaos:30, quality:1, raw:false },
+      { name:"スパイ", theme:"secret agent in tactical gear", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"full-body shot", angle:"three-quarter view", lighting:"cinematic key light", background:"city night background", ar:"9:16", stylize:150, chaos:20, quality:1, raw:true },
+      { name:"ドラゴンライダー", theme:"dragon rider with magical armor", personTemplate:"fantasy character, unique features, mystical appearance", composition:"portrait shot", angle:"front view", lighting:"cinematic key light", background:"city night background", ar:"1:1", stylize:300, chaos:40, quality:1, raw:false },
+      { name:"カフェオーナー", theme:"friendly cafe owner serving coffee", personTemplate:"elderly person, wise expression, wrinkled face", composition:"mid-body shot", angle:"over-shoulder view", lighting:"soft window light", background:"cafe street background", ar:"4:3", stylize:100, chaos:0, quality:1, raw:true }
     ];
 
     // ===== 状態管理キー =====
@@ -838,20 +589,21 @@
     // 初期化
     document.addEventListener('DOMContentLoaded', function () {
       loadPresets();
-      displayPresets();
       restoreLastState();
       restoreEditorText();
+
       setupButtons();
       setupARCustomToggle();
       setupAutoSave();
 
-      // 初回も一回生成しておく（テーマ等が空でもOK）
-      generatePrompt({ silentToast: true });
+      displayPresets();
+
+      generatePrompt({ silentToast: true, overwriteEditor: false });
     });
 
     function setupButtons() {
-      document.getElementById('btnGenerate').addEventListener('click', () => generatePrompt());
-      document.getElementById('btnSave').addEventListener('click', savePreset);
+      document.getElementById('btnGenerate').addEventListener('click', () => generatePrompt({ overwriteEditor: true }));
+      document.getElementById('btnSave').addEventListener('click', saveOrUpdatePreset);
       document.getElementById('btnCopy').addEventListener('click', copyToClipboard);
 
       document.getElementById('btnRebuild').addEventListener('click', () => {
@@ -872,12 +624,12 @@
       rawStyle.addEventListener('change', () => {
         localStorage.setItem(KEY_RAW_MODE, 'style');
         saveCurrentState();
-        generatePrompt({ silentToast: true });
+        generatePrompt({ silentToast: true, overwriteEditor: true });
       });
       rawRaw.addEventListener('change', () => {
         localStorage.setItem(KEY_RAW_MODE, 'raw');
         saveCurrentState();
-        generatePrompt({ silentToast: true });
+        generatePrompt({ silentToast: true, overwriteEditor: true });
       });
 
       // エディタ編集：保存（軽めのdebounce）
@@ -899,7 +651,7 @@
       }
     }
 
-    // プリセット一覧を表示
+    // プリセット一覧を表示（🗑削除付き）
     function displayPresets() {
       const presetList = document.getElementById('presetList');
       const stored = localStorage.getItem(KEY_PRESETS);
@@ -909,15 +661,52 @@
       presets.forEach((preset, index) => {
         const div = document.createElement('div');
         div.className = 'preset-item';
+
         div.innerHTML = `
-          <h4>${escapeHtml(preset.name)}</h4>
-          <p>${escapeHtml(preset.theme || '')}</p>
+          <div class="preset-item-row">
+            <div class="preset-main">
+              <h4>${escapeHtml(preset.name)}</h4>
+              <p>${escapeHtml(preset.theme || '')}</p>
+            </div>
+            <div class="preset-actions">
+              <button class="preset-btn danger" type="button" aria-label="delete">🗑</button>
+            </div>
+          </div>
         `;
-        // iPhoneでタップが効かないケース対策：click + touchend
+
+        // 全体タップで読み込み
         div.addEventListener('click', () => loadPreset(index));
         div.addEventListener('touchend', (e) => { e.preventDefault(); loadPreset(index); }, { passive: false });
+
+        // 削除ボタン
+        const delBtn = div.querySelector('.preset-btn.danger');
+        delBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deletePreset(index);
+        });
+        delBtn.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          deletePreset(index);
+        }, { passive: false });
+
         presetList.appendChild(div);
       });
+    }
+
+    function deletePreset(index) {
+      const stored = localStorage.getItem(KEY_PRESETS);
+      const presets = stored ? JSON.parse(stored) : [];
+      const target = presets[index];
+      if (!target) return;
+
+      const ok = confirm(`"${target.name}" を削除しますか？`);
+      if (!ok) return;
+
+      presets.splice(index, 1);
+      localStorage.setItem(KEY_PRESETS, JSON.stringify(presets));
+      displayPresets();
+      showToast(`"${target.name}" を削除しました`);
     }
 
     function escapeHtml(str) {
@@ -946,7 +735,7 @@
       arSelect.addEventListener('change', () => {
         sync();
         saveCurrentState();
-        generatePrompt({ silentToast: true });
+        generatePrompt({ silentToast: true, overwriteEditor: true });
       });
 
       sync();
@@ -959,7 +748,6 @@
       const presets = stored ? JSON.parse(stored) : samplePresets;
       const preset = presets[index];
 
-      // 現在のオプション値を退避（維持したい）
       const keepSeed = document.getElementById('seed').value;
       const keepSref = document.getElementById('sref').value;
       const keepCref = document.getElementById('cref').value;
@@ -971,14 +759,12 @@
       document.getElementById('lighting').value = preset.lighting || 'soft window light';
       document.getElementById('background').value = preset.background || 'minimal studio background';
 
-      // ar：customの場合も考慮（プリセット側は基本 fixed 想定）
       if (preset.ar && preset.ar !== 'custom') {
         document.getElementById('ar').value = preset.ar;
       } else {
         document.getElementById('ar').value = '9:16';
       }
 
-      // custom ar 値（保存されてる場合だけ復元）
       if (preset.ar === 'custom' && preset.arCustom && isValidAR(preset.arCustom)) {
         document.getElementById('ar').value = 'custom';
         document.getElementById('arCustom').value = preset.arCustom;
@@ -989,25 +775,22 @@
       document.getElementById('quality').value = preset.quality ?? 1;
       document.getElementById('raw').checked = preset.raw || false;
 
+      // RAW表記（保存されていれば復元）
+      if (preset.rawMode) localStorage.setItem(KEY_RAW_MODE, preset.rawMode);
+
+      const mode = getRawMode();
+      document.getElementById('rawStyle').checked = (mode === 'style');
+      document.getElementById('rawRaw').checked = (mode === 'raw');
+
       // 維持（プリセットに明示があればそれを採用、なければ保持）
       document.getElementById('seed').value = (preset.seed !== undefined && preset.seed !== null && preset.seed !== '') ? preset.seed : keepSeed;
       document.getElementById('sref').value = (preset.sref !== undefined && preset.sref !== null && preset.sref !== '') ? preset.sref : keepSref;
       document.getElementById('cref').value = (preset.cref !== undefined && preset.cref !== null && preset.cref !== '') ? preset.cref : keepCref;
 
-      // RAW mode（プリセットにあれば適用）
-      if (preset.rawMode) localStorage.setItem(KEY_RAW_MODE, preset.rawMode);
-
-      // ラジオ状態反映
-      const mode = getRawMode();
-      document.getElementById('rawStyle').checked = (mode === 'style');
-      document.getElementById('rawRaw').checked = (mode === 'raw');
-
-      // Custom AR UI同期
       const arSelect = document.getElementById('ar');
       const wrap = document.getElementById('arCustomWrap');
       wrap.style.display = (arSelect.value === 'custom') ? 'block' : 'none';
 
-      // 生成 → エディタ上書き（プリセット適用なので上書きが自然）
       generatePrompt({ overwriteEditor: true, silentToast: true });
 
       saveCurrentState();
@@ -1029,7 +812,6 @@
       const lighting = document.getElementById('lighting').value;
       const background = document.getElementById('background').value;
 
-      // プロンプト本文
       const promptParts = [];
       if (theme) promptParts.push(theme);
       if (personTemplate) promptParts.push(personTemplate);
@@ -1040,7 +822,6 @@
 
       const prompt = promptParts.join(', ');
 
-      // パラメータ
       let ar = document.getElementById('ar').value;
       if (ar === 'custom') {
         const custom = document.getElementById('arCustom').value;
@@ -1075,7 +856,6 @@
     }
 
     // プロンプト生成（エディタへ反映）
-    // overwriteEditor: true -> エディタ上書き
     function generatePrompt(opts = {}) {
       const { overwriteEditor = true, silentToast = false } = opts;
 
@@ -1086,18 +866,16 @@
         editor.value = fullPrompt;
         saveEditorText();
       } else {
-        // 上書きしない場合：空のときだけ入れる
         if (!editor.value || editor.value === 'ここに生成されたプロンプトが表示されます...') {
           editor.value = fullPrompt;
           saveEditorText();
         }
       }
 
-      // 生成のたびに保存（更新ボタン/リロード耐性）
       saveCurrentState();
 
-      if (!silentToast && fullPrompt && fullPrompt !== 'プロンプトを生成するには、少なくともテーマを入力してください。') {
-        // 必要なら通知（うるさければ silentToast を使う）
+      if (!silentToast) {
+        // 必要ならここで通知
       }
     }
 
@@ -1114,17 +892,15 @@
         return;
       }
 
-      // 失敗時に手動コピーしやすくする：textareaの全文選択
       function selectEditorText() {
         try {
           editor.focus();
           editor.select();
-          editor.setSelectionRange(0, editor.value.length); // iOS対策
+          editor.setSelectionRange(0, editor.value.length);
           editor.scrollIntoView({ block: 'center', behavior: 'smooth' });
         } catch (_) {}
       }
 
-      // 1) Clipboard API
       try {
         if (navigator.clipboard && window.isSecureContext) {
           await navigator.clipboard.writeText(text);
@@ -1133,7 +909,6 @@
         }
       } catch (_) {}
 
-      // 2) execCommand fallback
       try {
         selectEditorText();
         const ok = document.execCommand('copy');
@@ -1143,24 +918,21 @@
         }
       } catch (_) {}
 
-      // 3) manual 안내（固定バー表示 + 自動選択）
       selectEditorText();
       showCopyHelper();
       showToast('コピーできませんでした。手動でコピーしてください', 'error');
     }
 
     function showCopyHelper() {
-      const el = document.getElementById('copyHelper');
-      el.style.display = 'block';
+      document.getElementById('copyHelper').style.display = 'block';
     }
     function hideCopyHelper() {
-      const el = document.getElementById('copyHelper');
-      el.style.display = 'none';
+      document.getElementById('copyHelper').style.display = 'none';
     }
 
-    // プリセット保存
-    function savePreset() {
-      const name = prompt('プリセット名を入力してください:');
+    // ===== Save / Update（同名なら更新）=====
+    function saveOrUpdatePreset() {
+      const name = (prompt('プリセット名を入力してください（同名があれば上書き更新）:') || '').trim();
       if (!name) return;
 
       // ar（customなら arCustom を保存）
@@ -1177,15 +949,15 @@
       }
 
       const preset = {
-        name: name,
+        name,
         theme: document.getElementById('theme').value,
         personTemplate: document.getElementById('personTemplate').value,
         composition: document.getElementById('composition').value,
         angle: document.getElementById('angle').value,
         lighting: document.getElementById('lighting').value,
         background: document.getElementById('background').value,
-        ar: ar,
-        arCustom: arCustom,
+        ar,
+        arCustom,
         stylize: parseInt(document.getElementById('stylize').value, 10),
         chaos: parseInt(document.getElementById('chaos').value, 10),
         quality: parseFloat(document.getElementById('quality').value),
@@ -1197,12 +969,23 @@
       };
 
       const stored = localStorage.getItem(KEY_PRESETS);
-      const presets = stored ? JSON.parse(stored) : samplePresets;
-      presets.unshift(preset);
-      localStorage.setItem(KEY_PRESETS, JSON.stringify(presets));
+      const presets = stored ? JSON.parse(stored) : [];
 
-      displayPresets();
-      showToast(`"${name}" を保存しました`);
+      const idx = presets.findIndex(p => (p?.name || '').trim() === name);
+      if (idx >= 0) {
+        presets[idx] = preset; // 上書き
+        // 直近に見えるよう先頭へ移動
+        const updated = presets.splice(idx, 1)[0];
+        presets.unshift(updated);
+        localStorage.setItem(KEY_PRESETS, JSON.stringify(presets));
+        displayPresets();
+        showToast(`"${name}" を更新しました`);
+      } else {
+        presets.unshift(preset);
+        localStorage.setItem(KEY_PRESETS, JSON.stringify(presets));
+        displayPresets();
+        showToast(`"${name}" を保存しました`);
+      }
     }
 
     // トースト表示（success / error）
@@ -1225,7 +1008,6 @@
       const stored = localStorage.getItem(KEY_EDITOR);
       if (!stored) return;
       const editor = document.getElementById('outputEditor');
-      // 初期文言のままなら上書き、すでに何かあれば触らない
       if (!editor.value || editor.value === 'ここに生成されたプロンプトが表示されます...') {
         editor.value = stored;
       }
@@ -1285,10 +1067,8 @@
         document.getElementById('sref').value = state.sref || '';
         document.getElementById('cref').value = state.cref || '';
 
-        // RAWモード復元
         if (state.rawMode) localStorage.setItem(KEY_RAW_MODE, state.rawMode);
 
-        // ラジオ状態反映
         const mode = getRawMode();
         document.getElementById('rawStyle').checked = (mode === 'style');
         document.getElementById('rawRaw').checked = (mode === 'raw');
@@ -1312,18 +1092,13 @@
 
         el.addEventListener('input', () => {
           saveCurrentState();
-          // テキスト入力ごとに出力を追従させたいなら有効化
-          // generatePrompt({ silentToast: true });
         });
 
         el.addEventListener('change', () => {
           saveCurrentState();
-          generatePrompt({ silentToast: true }); // select/checkboxは即反映
+          generatePrompt({ silentToast: true, overwriteEditor: true });
         });
       });
-
-      // 出力エディタも常時保存（すでにdebounce済み）
-      // ここでは特に追加しない
     }
   </script>
 </body>
