@@ -137,6 +137,48 @@
     .btn-light { background: #e9ecef; color: #333; }
     .btn-light:hover { background: #dde2e6; }
 
+    .btn-danger{
+      background:#ef4444;
+      color:#fff;
+      border:none;
+    }
+    .btn-danger:hover{ opacity:.9; }
+
+    /* JSON modal */
+    .modal-backdrop{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.5);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      z-index:9999;
+    }
+    .modal{
+      background:#fff;
+      width:min(900px, 96vw);
+      border-radius:14px;
+      padding:16px;
+      box-shadow:0 10px 35px rgba(0,0,0,.25);
+    }
+    .modal h3{ margin:0 0 10px 0; font-size:16px; }
+    .modal textarea{
+      width:100%;
+      height:280px;
+      padding:10px;
+      border:1px solid #d1d5db;
+      border-radius:10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size:12px;
+    }
+    .modal .modal-actions{
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+
     .output-editor {
       background: #fff;
       border: 2px solid #667eea;
@@ -155,7 +197,6 @@
       overflow-wrap: anywhere;
       word-break: break-word;
       -webkit-overflow-scrolling: touch;
-
       resize: vertical;
     }
 
@@ -181,18 +222,15 @@
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
-
     .preset-item:hover {
       background: #e9ecef;
       transform: translateX(5px);
     }
-
     .preset-item h4 {
       color: #667eea;
       margin-bottom: 5px;
       font-size: 0.9rem;
     }
-
     .preset-item p {
       color: #666;
       font-size: 0.85rem;
@@ -200,8 +238,8 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    .preset-memo{ font-size:12px; color:#6b7280; margin-top:4px; }
 
-    /* ==== Preset actions (delete) ==== */
     .preset-item-row {
       display: flex;
       align-items: center;
@@ -383,7 +421,11 @@
             <option value="elderly person, wise expression, wrinkled face">Elderly Person</option>
             <option value="child, innocent eyes, playful expression">Child</option>
             <option value="fantasy character, unique features, mystical appearance">Fantasy Character</option>
+            <option value="custom">自由入力 / Custom…</option>
           </select>
+          <div id="personTemplateCustomWrap" style="display:none; margin-top:8px;">
+            <input id="personTemplateCustom" type="text" placeholder="例: a realistic young japanese woman, detailed facial features" style="width:100%;">
+          </div>
         </div>
 
         <div class="param-grid">
@@ -394,7 +436,11 @@
               <option value="portrait shot">Portrait</option>
               <option value="mid-body shot">Mid-body</option>
               <option value="full-body shot">Full-body</option>
+              <option value="custom">自由入力 / Custom…</option>
             </select>
+            <div id="compositionCustomWrap" style="display:none; margin-top:8px;">
+              <input id="compositionCustom" type="text" placeholder="例: close-up shot / mid-body shot / full-body shot" style="width:100%;">
+            </div>
           </div>
 
           <div class="form-group">
@@ -404,7 +450,11 @@
               <option value="three-quarter view">Three-quarter</option>
               <option value="side view">Side</option>
               <option value="over-shoulder view">Over-shoulder</option>
+              <option value="custom">自由入力 / Custom…</option>
             </select>
+            <div id="angleCustomWrap" style="display:none; margin-top:8px;">
+              <input id="angleCustom" type="text" placeholder="例: three-quarter view / low angle / top-down" style="width:100%;">
+            </div>
           </div>
         </div>
 
@@ -415,7 +465,11 @@
             <option value="neon rim lighting">Neon Rim Lighting</option>
             <option value="cinematic key light">Cinematic Key Light</option>
             <option value="studio beauty lighting">Studio Beauty Lighting</option>
+            <option value="custom">自由入力 / Custom…</option>
           </select>
+          <div id="lightingCustomWrap" style="display:none; margin-top:8px;">
+            <input id="lightingCustom" type="text" placeholder="例: soft window light / neon rim lighting / cinematic lighting" style="width:100%;">
+          </div>
         </div>
 
         <div class="form-group">
@@ -424,10 +478,23 @@
             <option value="city night background">City Night</option>
             <option value="minimal studio background">Minimal Studio</option>
             <option value="cafe street background">Cafe Street</option>
+            <option value="custom">自由入力 / Custom…</option>
           </select>
+          <div id="backgroundCustomWrap" style="display:none; margin-top:8px;">
+            <input id="backgroundCustom" type="text" placeholder="例: city night background / studio backdrop / shrine at night" style="width:100%;">
+          </div>
         </div>
 
         <h2 style="margin-top: 30px;">⚙️ Midjourneyパラメータ</h2>
+
+        <div class="form-group" style="margin-top:10px;">
+          <label for="fixedTail">固定追記（任意）/ Fixed Tail</label>
+          <input id="fixedTail" type="text" placeholder="例: cinematic film grain, ultra-detailed textures（※本文側に追加されます）" />
+        </div>
+        <div class="form-group" style="margin-top:10px;">
+          <label for="negative">除外（任意）/ --no</label>
+          <input id="negative" type="text" placeholder="例: text, watermark, logo（--no は自動付与）" />
+        </div>
 
         <div class="param-grid">
           <div class="form-group">
@@ -515,6 +582,7 @@
         <div class="button-group">
           <button class="btn-primary" type="button" id="btnGenerate">✨ Generate</button>
           <button class="btn-success" type="button" id="btnSave">💾 Save / Update</button>
+          <button class="btn-danger" type="button" id="btnClear">🧹 Clear</button>
         </div>
         <div class="small-text" style="margin-top:8px;">
           ※ Saveは新規保存。すでに同名がある場合は上書き更新します。
@@ -538,7 +606,26 @@
         </div>
 
         <h2 style="margin-top: 30px;">📚 プリセット（タップで読み込み / 🗑で削除）</h2>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin:10px 0 12px 0;">
+          <button class="btn-secondary" type="button" id="btnExportJson">⬇️ JSON Export</button>
+          <button class="btn-secondary" type="button" id="btnImportJson">⬆️ JSON Import</button>
+        </div>
         <div class="preset-list" id="presetList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="jsonBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal">
+      <h3 id="jsonModalTitle">Preset JSON</h3>
+      <textarea id="jsonTextarea" spellcheck="false" placeholder="ここにJSONが表示されます / ここにJSONを貼り付けてImport"></textarea>
+      <div class="modal-actions">
+        <button class="btn-light" type="button" id="btnJsonClose">Close</button>
+        <button class="btn-secondary" type="button" id="btnJsonCopy">Copy</button>
+        <button class="btn-primary" type="button" id="btnJsonApply">Import / Apply</button>
+      </div>
+      <div class="small-text" style="margin-top:8px;">
+        ※ Importは「同名なら上書き」して取り込みます。
       </div>
     </div>
   </div>
@@ -556,7 +643,7 @@
   </div>
 
   <script>
-    // サンプルプリセット（20個）
+    // ===== サンプルプリセット（20個） =====
     const samplePresets = [
       { name:"サイバーパンク ポートレート", theme:"cyberpunk warrior with glowing tattoos", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"portrait shot", angle:"three-quarter view", lighting:"neon rim lighting", background:"city night background", ar:"9:16", stylize:150, chaos:20, quality:1, raw:true },
       { name:"エレガント ファッション", theme:"elegant fashion model in luxury dress", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"full-body shot", angle:"front view", lighting:"studio beauty lighting", background:"minimal studio background", ar:"2:3", stylize:200, chaos:0, quality:2, raw:false },
@@ -581,134 +668,45 @@
     ];
 
     // ===== 状態管理キー =====
-    const KEY_PRESETS = 'mjPresets';
-    const KEY_LAST_STATE = 'mjLastState';
-    const KEY_EDITOR = 'mjOutputEditorText';
-    const KEY_RAW_MODE = 'mjRawMode'; // "style" | "raw"
+    const KEY_PRESETS   = 'mjPresets';
+    const KEY_LAST_STATE= 'mjLastState';
+    const KEY_EDITOR    = 'mjOutputEditorText';
+    const KEY_RAW_MODE  = 'mjRawMode'; // "style" | "raw"
 
-    // 初期化
-    document.addEventListener('DOMContentLoaded', function () {
-      loadPresets();
-      restoreLastState();
-      restoreEditorText();
-
-      setupButtons();
-      setupARCustomToggle();
-      setupAutoSave();
-
-      displayPresets();
-
-      generatePrompt({ silentToast: true, overwriteEditor: false });
-    });
-
-    function setupButtons() {
-      document.getElementById('btnGenerate').addEventListener('click', () => generatePrompt({ overwriteEditor: true }));
-      document.getElementById('btnSave').addEventListener('click', saveOrUpdatePreset);
-      document.getElementById('btnCopy').addEventListener('click', copyToClipboard);
-
-      document.getElementById('btnRebuild').addEventListener('click', () => {
-        generatePrompt({ overwriteEditor: true, fromRebuild: true });
-        showToast('左の設定から再生成しました');
-      });
-
-      document.getElementById('btnCopyHelpClose').addEventListener('click', hideCopyHelper);
-
-      // RAW表記ラジオ
-      const rawStyle = document.getElementById('rawStyle');
-      const rawRaw = document.getElementById('rawRaw');
-
-      const storedMode = localStorage.getItem(KEY_RAW_MODE);
-      if (storedMode === 'raw') rawRaw.checked = true;
-      else rawStyle.checked = true;
-
-      rawStyle.addEventListener('change', () => {
-        localStorage.setItem(KEY_RAW_MODE, 'style');
-        saveCurrentState();
-        generatePrompt({ silentToast: true, overwriteEditor: true });
-      });
-      rawRaw.addEventListener('change', () => {
-        localStorage.setItem(KEY_RAW_MODE, 'raw');
-        saveCurrentState();
-        generatePrompt({ silentToast: true, overwriteEditor: true });
-      });
-
-      // エディタ編集：保存（軽めのdebounce）
-      const editor = document.getElementById('outputEditor');
-      let t = null;
-      editor.addEventListener('input', () => {
-        if (t) clearTimeout(t);
-        t = setTimeout(() => {
-          saveEditorText();
-        }, 250);
-      });
+    // ===== 安全なJSON =====
+    function safeParseJSON(raw, fallback){
+      if (!raw) return fallback;
+      try { return JSON.parse(raw); } catch { return fallback; }
     }
 
-    // プリセットをlocalStorageから読み込み、なければサンプルを使用
+    // ===== RAW表記 =====
+    function getRawMode() {
+      const stored = localStorage.getItem(KEY_RAW_MODE);
+      return stored === 'raw' ? 'raw' : 'style';
+    }
+    function setRawMode(mode){
+      const m = (mode === 'raw') ? 'raw' : 'style';
+      localStorage.setItem(KEY_RAW_MODE, m);
+    }
+
+    // ===== プリセット保存/読込 =====
     function loadPresets() {
-      const stored = localStorage.getItem(KEY_PRESETS);
-      if (!stored) {
-        localStorage.setItem(KEY_PRESETS, JSON.stringify(samplePresets));
-      }
+      const raw = localStorage.getItem(KEY_PRESETS);
+      const parsed = safeParseJSON(raw, null);
+
+      if (Array.isArray(parsed)) return parsed;
+
+      // 初回はサンプルを保存して返す（空でもOKにしたいならここを [] にしてもOK）
+      localStorage.setItem(KEY_PRESETS, JSON.stringify(samplePresets));
+      return [...samplePresets];
     }
 
-    // プリセット一覧を表示（🗑削除付き）
-    function displayPresets() {
-      const presetList = document.getElementById('presetList');
-      const stored = localStorage.getItem(KEY_PRESETS);
-      const presets = stored ? JSON.parse(stored) : samplePresets;
-
-      presetList.innerHTML = '';
-      presets.forEach((preset, index) => {
-        const div = document.createElement('div');
-        div.className = 'preset-item';
-
-        div.innerHTML = `
-          <div class="preset-item-row">
-            <div class="preset-main">
-              <h4>${escapeHtml(preset.name)}</h4>
-              <p>${escapeHtml(preset.theme || '')}</p>
-            </div>
-            <div class="preset-actions">
-              <button class="preset-btn danger" type="button" aria-label="delete">🗑</button>
-            </div>
-          </div>
-        `;
-
-        // 全体タップで読み込み
-        div.addEventListener('click', () => loadPreset(index));
-        div.addEventListener('touchend', (e) => { e.preventDefault(); loadPreset(index); }, { passive: false });
-
-        // 削除ボタン
-        const delBtn = div.querySelector('.preset-btn.danger');
-        delBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          deletePreset(index);
-        });
-        delBtn.addEventListener('touchend', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          deletePreset(index);
-        }, { passive: false });
-
-        presetList.appendChild(div);
-      });
+    function savePresets(presets) {
+      const safe = Array.isArray(presets) ? presets : [];
+      localStorage.setItem(KEY_PRESETS, JSON.stringify(safe));
     }
 
-    function deletePreset(index) {
-      const stored = localStorage.getItem(KEY_PRESETS);
-      const presets = stored ? JSON.parse(stored) : [];
-      const target = presets[index];
-      if (!target) return;
-
-      const ok = confirm(`"${target.name}" を削除しますか？`);
-      if (!ok) return;
-
-      presets.splice(index, 1);
-      localStorage.setItem(KEY_PRESETS, JSON.stringify(presets));
-      displayPresets();
-      showToast(`"${target.name}" を削除しました`);
-    }
-
+    // ===== HTMLエスケープ =====
     function escapeHtml(str) {
       return String(str ?? '')
         .replaceAll('&', '&amp;')
@@ -716,6 +714,96 @@
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#39;');
+    }
+
+    // ===== Custom欄の表示/非表示 =====
+    function syncCustomVisibility() {
+      const pairs = [
+        ['personTemplate', 'personTemplateCustomWrap'],
+        ['composition', 'compositionCustomWrap'],
+        ['angle', 'angleCustomWrap'],
+        ['lighting', 'lightingCustomWrap'],
+        ['background', 'backgroundCustomWrap'],
+      ];
+      pairs.forEach(([selectId, wrapId]) => {
+        const sel = document.getElementById(selectId);
+        const wrap = document.getElementById(wrapId);
+        if (!sel || !wrap) return;
+        wrap.style.display = (sel.value === 'custom') ? 'block' : 'none';
+      });
+    }
+
+    // ===== 互換適用（select or custom） =====
+    function applyPresetField(selectId, customInputId, selectValue, customValue) {
+      const sel = document.getElementById(selectId);
+      const custom = document.getElementById(customInputId);
+      if (!sel) return;
+
+      const wantsCustom = (selectValue === 'custom') || (customValue && customValue.trim() !== '');
+      const hasOption = (v) => Array.from(sel.options || []).some(o => o.value === v);
+
+      if (wantsCustom) {
+        sel.value = 'custom';
+        if (custom) custom.value = (customValue || '').trim();
+        return;
+      }
+
+      const v = (selectValue || '').trim();
+      if (v && hasOption(v)) {
+        sel.value = v;
+        if (custom) custom.value = '';
+      } else {
+        sel.value = 'custom';
+        if (custom) custom.value = v;
+      }
+    }
+
+    // ===== リセット（混在防止） =====
+    function resetPromptSettings({ keepRefs } = { keepRefs: true }) {
+      const theme = document.getElementById('theme');
+      if (theme) theme.value = '';
+
+      const selects = ['personTemplate','composition','angle','lighting','background'];
+      selects.forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        const first = sel.options && sel.options.length ? sel.options[0].value : '';
+        sel.value = first;
+      });
+
+      const customs = ['personTemplateCustom','compositionCustom','angleCustom','lightingCustom','backgroundCustom'];
+      customs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+
+      const ar = document.getElementById('ar');
+      const arCustom = document.getElementById('arCustom');
+      if (ar) ar.value = '9:16';
+      if (arCustom) arCustom.value = '';
+      const wrap = document.getElementById('arCustomWrap');
+      if (wrap) wrap.style.display = 'none';
+
+      document.getElementById('stylize').value = 100;
+      document.getElementById('chaos').value = 0;
+      document.getElementById('quality').value = 1;
+      document.getElementById('raw').checked = false;
+
+      const fixedTail = document.getElementById('fixedTail'); if (fixedTail) fixedTail.value = '';
+      const negative = document.getElementById('negative'); if (negative) negative.value = '';
+
+      setRawMode('style');
+      document.getElementById('rawStyle').checked = true;
+      document.getElementById('rawRaw').checked = false;
+
+      if (!keepRefs) {
+        ['seed','sref','cref'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+      }
+
+      syncCustomVisibility();
     }
 
     // ====== Custom AR ======
@@ -741,76 +829,63 @@
       sync();
     }
 
-    // プリセットを読み込み
-    // 仕様：プリセット変更時にsref/cref/seedは基本維持（消えない）
-    function loadPreset(index) {
-      const stored = localStorage.getItem(KEY_PRESETS);
-      const presets = stored ? JSON.parse(stored) : samplePresets;
-      const preset = presets[index];
+    function setupCustomToggles() {
+      const pairs = [
+        ['personTemplate', 'personTemplateCustomWrap'],
+        ['composition', 'compositionCustomWrap'],
+        ['angle', 'angleCustomWrap'],
+        ['lighting', 'lightingCustomWrap'],
+        ['background', 'backgroundCustomWrap'],
+      ];
 
-      const keepSeed = document.getElementById('seed').value;
-      const keepSref = document.getElementById('sref').value;
-      const keepCref = document.getElementById('cref').value;
+      pairs.forEach(([selectId, wrapId]) => {
+        const sel = document.getElementById(selectId);
+        const wrap = document.getElementById(wrapId);
+        if (!sel || !wrap) return;
 
-      document.getElementById('theme').value = preset.theme || '';
-      document.getElementById('personTemplate').value = preset.personTemplate || '';
-      document.getElementById('composition').value = preset.composition || 'portrait shot';
-      document.getElementById('angle').value = preset.angle || 'front view';
-      document.getElementById('lighting').value = preset.lighting || 'soft window light';
-      document.getElementById('background').value = preset.background || 'minimal studio background';
+        const sync = () => wrap.style.display = (sel.value === 'custom') ? 'block' : 'none';
 
-      if (preset.ar && preset.ar !== 'custom') {
-        document.getElementById('ar').value = preset.ar;
-      } else {
-        document.getElementById('ar').value = '9:16';
-      }
+        sel.addEventListener('change', () => {
+          sync();
+          saveCurrentState();
+          generatePrompt({ silentToast: true, overwriteEditor: false });
+        });
 
-      if (preset.ar === 'custom' && preset.arCustom && isValidAR(preset.arCustom)) {
-        document.getElementById('ar').value = 'custom';
-        document.getElementById('arCustom').value = preset.arCustom;
-      }
-
-      document.getElementById('stylize').value = preset.stylize ?? 100;
-      document.getElementById('chaos').value = preset.chaos ?? 0;
-      document.getElementById('quality').value = preset.quality ?? 1;
-      document.getElementById('raw').checked = preset.raw || false;
-
-      // RAW表記（保存されていれば復元）
-      if (preset.rawMode) localStorage.setItem(KEY_RAW_MODE, preset.rawMode);
-
-      const mode = getRawMode();
-      document.getElementById('rawStyle').checked = (mode === 'style');
-      document.getElementById('rawRaw').checked = (mode === 'raw');
-
-      // 維持（プリセットに明示があればそれを採用、なければ保持）
-      document.getElementById('seed').value = (preset.seed !== undefined && preset.seed !== null && preset.seed !== '') ? preset.seed : keepSeed;
-      document.getElementById('sref').value = (preset.sref !== undefined && preset.sref !== null && preset.sref !== '') ? preset.sref : keepSref;
-      document.getElementById('cref').value = (preset.cref !== undefined && preset.cref !== null && preset.cref !== '') ? preset.cref : keepCref;
-
-      const arSelect = document.getElementById('ar');
-      const wrap = document.getElementById('arCustomWrap');
-      wrap.style.display = (arSelect.value === 'custom') ? 'block' : 'none';
-
-      generatePrompt({ overwriteEditor: true, silentToast: true });
-
-      saveCurrentState();
-      showToast(`"${preset.name}" を読み込みました`);
-    }
-
-    // ===== RAW表記 =====
-    function getRawMode() {
-      const stored = localStorage.getItem(KEY_RAW_MODE);
-      return stored === 'raw' ? 'raw' : 'style';
+        sync();
+      });
     }
 
     // ===== プロンプト生成（左設定 → 文字列） =====
     function buildPromptString() {
       const theme = document.getElementById('theme').value.trim();
-      const personTemplate = document.getElementById('personTemplate').value;
-      const composition = document.getElementById('composition').value;
-      const angle = document.getElementById('angle').value;
-      const lighting = document.getElementById('lighting').value;
-      const background = document.getElementById('background').value;
+
+      const personTemplateSel = document.getElementById('personTemplate').value;
+      const personTemplate = (personTemplateSel === 'custom')
+        ? document.getElementById('personTemplateCustom').value.trim()
+        : personTemplateSel;
+
+      const compositionSel = document.getElementById('composition').value;
+      const composition = (compositionSel === 'custom')
+        ? document.getElementById('compositionCustom').value.trim()
+        : compositionSel;
+
+      const angleSel = document.getElementById('angle').value;
+      const angle = (angleSel === 'custom')
+        ? document.getElementById('angleCustom').value.trim()
+        : angleSel;
+
+      const lightingSel = document.getElementById('lighting').value;
+      const lighting = (lightingSel === 'custom')
+        ? document.getElementById('lightingCustom').value.trim()
+        : lightingSel;
+
+      const backgroundSel = document.getElementById('background').value;
+      const background = (backgroundSel === 'custom')
+        ? document.getElementById('backgroundCustom').value.trim()
+        : backgroundSel;
+
+      const fixedTail = (document.getElementById('fixedTail') ? document.getElementById('fixedTail').value.trim() : '');
+      const negative = (document.getElementById('negative') ? document.getElementById('negative').value.trim() : '');
 
       const promptParts = [];
       if (theme) promptParts.push(theme);
@@ -819,6 +894,7 @@
       if (angle) promptParts.push(angle);
       if (lighting) promptParts.push(lighting);
       if (background) promptParts.push(background);
+      if (fixedTail) promptParts.push(fixedTail);
 
       const prompt = promptParts.join(', ');
 
@@ -841,6 +917,10 @@
       if (stylize !== '' && stylize !== null && stylize !== undefined) params.push(`--stylize ${stylize}`);
       if (chaos && chaos != 0) params.push(`--chaos ${chaos}`);
       if (quality) params.push(`--quality ${quality}`);
+      if (negative) {
+        const noStr = negative.startsWith('--no') ? negative : `--no ${negative}`;
+        params.push(noStr);
+      }
 
       if (rawEnabled) {
         const mode = getRawMode();
@@ -855,7 +935,6 @@
       return fullPrompt || 'プロンプトを生成するには、少なくともテーマを入力してください。';
     }
 
-    // プロンプト生成（エディタへ反映）
     function generatePrompt(opts = {}) {
       const { overwriteEditor = true, silentToast = false } = opts;
 
@@ -873,13 +952,10 @@
       }
 
       saveCurrentState();
-
-      if (!silentToast) {
-        // 必要ならここで通知
-      }
+      if (!silentToast) { /* 通知したければここ */ }
     }
 
-    // ===== Copy: iPhone/Safari対策（失敗時に手動コピー案内） =====
+    // ===== Copy: iPhone/Safari対策 =====
     async function copyToClipboard() {
       hideCopyHelper();
 
@@ -930,12 +1006,15 @@
       document.getElementById('copyHelper').style.display = 'none';
     }
 
-    // ===== Save / Update（同名なら更新）=====
+    // ===== Save / Update =====
     function saveOrUpdatePreset() {
       const name = (prompt('プリセット名を入力してください（同名があれば上書き更新）:') || '').trim();
       if (!name) return;
 
-      // ar（customなら arCustom を保存）
+      const presetsBefore = loadPresets();
+      const existing = presetsBefore.find(p => p.name === name);
+      const memo = (prompt('メモ（用途/狙い）※任意:', (existing && existing.memo) ? existing.memo : '') || '').trim();
+
       let ar = document.getElementById('ar').value;
       let arCustom = '';
       if (ar === 'custom') {
@@ -950,12 +1029,18 @@
 
       const preset = {
         name,
+        memo,
         theme: document.getElementById('theme').value,
         personTemplate: document.getElementById('personTemplate').value,
         composition: document.getElementById('composition').value,
         angle: document.getElementById('angle').value,
         lighting: document.getElementById('lighting').value,
         background: document.getElementById('background').value,
+        personTemplateCustom: document.getElementById('personTemplateCustom') ? document.getElementById('personTemplateCustom').value : '',
+        compositionCustom: document.getElementById('compositionCustom') ? document.getElementById('compositionCustom').value : '',
+        angleCustom: document.getElementById('angleCustom') ? document.getElementById('angleCustom').value : '',
+        lightingCustom: document.getElementById('lightingCustom') ? document.getElementById('lightingCustom').value : '',
+        backgroundCustom: document.getElementById('backgroundCustom') ? document.getElementById('backgroundCustom').value : '',
         ar,
         arCustom,
         stylize: parseInt(document.getElementById('stylize').value, 10),
@@ -963,39 +1048,264 @@
         quality: parseFloat(document.getElementById('quality').value),
         raw: document.getElementById('raw').checked,
         rawMode: getRawMode(),
+        fixedTail: document.getElementById('fixedTail') ? document.getElementById('fixedTail').value : '',
+        negative: document.getElementById('negative') ? document.getElementById('negative').value : '',
         seed: document.getElementById('seed').value,
         sref: document.getElementById('sref').value,
         cref: document.getElementById('cref').value
       };
 
-      const stored = localStorage.getItem(KEY_PRESETS);
-      const presets = stored ? JSON.parse(stored) : [];
-
+      const presets = loadPresets();
       const idx = presets.findIndex(p => (p?.name || '').trim() === name);
+
       if (idx >= 0) {
-        presets[idx] = preset; // 上書き
-        // 直近に見えるよう先頭へ移動
+        presets[idx] = preset;
         const updated = presets.splice(idx, 1)[0];
         presets.unshift(updated);
-        localStorage.setItem(KEY_PRESETS, JSON.stringify(presets));
+        savePresets(presets);
         displayPresets();
         showToast(`"${name}" を更新しました`);
       } else {
         presets.unshift(preset);
-        localStorage.setItem(KEY_PRESETS, JSON.stringify(presets));
+        savePresets(presets);
         displayPresets();
         showToast(`"${name}" を保存しました`);
       }
     }
 
-    // トースト表示（success / error）
+    // ===== トースト =====
     function showToast(message, type = 'success') {
       const toast = document.getElementById('toast');
       toast.classList.remove('error');
       if (type === 'error') toast.classList.add('error');
       toast.textContent = message;
       toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 3500);
+      setTimeout(() => { toast.style.display = 'none'; }, 2500);
+    }
+
+    // ===== Clear（バグっていたので全面修正） =====
+    function clearAll() {
+      resetPromptSettings({ keepRefs: false });
+
+      const editor = document.getElementById('outputEditor');
+      editor.value = 'ここに生成されたプロンプトが表示されます...';
+      saveEditorText();
+
+      localStorage.removeItem(KEY_LAST_STATE);
+      showToast('初期化しました');
+    }
+
+    // ===== プリセット表示 =====
+    function displayPresets() {
+      const list = document.getElementById('presetList');
+      const presets = loadPresets();
+
+      if (!presets.length) {
+        list.innerHTML = '<div class="small-text">プリセットがありません</div>';
+        return;
+      }
+
+      list.innerHTML = presets.map((p, idx) => {
+        const title = escapeHtml(p.name || '(no name)');
+        const memo  = escapeHtml(p.memo || '');
+        const snippet = escapeHtml((p.theme || '').slice(0, 60));
+        return `
+          <div class="preset-item" data-index="${idx}">
+            <div class="preset-item-row">
+              <div class="preset-main">
+                <h4>${title}</h4>
+                <p>${snippet}</p>
+                ${memo ? `<div class="preset-memo">${memo}</div>` : ``}
+              </div>
+              <div class="preset-actions">
+                <button class="preset-btn danger" type="button" data-action="delete" data-index="${idx}" title="削除">🗑</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ===== プリセット読み込み =====
+    function loadPreset(index) {
+      const presets = loadPresets();
+      const preset = presets[index];
+      if (!preset) return;
+
+      resetPromptSettings({ keepRefs: true });
+
+      const keepSeed = document.getElementById('seed').value;
+      const keepSref = document.getElementById('sref').value;
+      const keepCref = document.getElementById('cref').value;
+
+      document.getElementById('theme').value = preset.theme || '';
+
+      applyPresetField('personTemplate', 'personTemplateCustom', preset.personTemplate, preset.personTemplateCustom);
+      applyPresetField('composition', 'compositionCustom', preset.composition, preset.compositionCustom);
+      applyPresetField('angle', 'angleCustom', preset.angle, preset.angleCustom);
+      applyPresetField('lighting', 'lightingCustom', preset.lighting, preset.lightingCustom);
+      applyPresetField('background', 'backgroundCustom', preset.background, preset.backgroundCustom);
+
+      if (preset.ar && preset.ar !== 'custom') {
+        document.getElementById('ar').value = preset.ar;
+        document.getElementById('arCustom').value = '';
+      } else {
+        document.getElementById('ar').value = '9:16';
+        document.getElementById('arCustom').value = '';
+      }
+      if (preset.ar === 'custom' && preset.arCustom && isValidAR(preset.arCustom)) {
+        document.getElementById('ar').value = 'custom';
+        document.getElementById('arCustom').value = preset.arCustom;
+      }
+      document.getElementById('arCustomWrap').style.display =
+        (document.getElementById('ar').value === 'custom') ? 'block' : 'none';
+
+      document.getElementById('stylize').value = preset.stylize ?? 100;
+      document.getElementById('chaos').value = preset.chaos ?? 0;
+      document.getElementById('quality').value = preset.quality ?? 1;
+      document.getElementById('raw').checked = preset.raw || false;
+
+      if (document.getElementById('fixedTail')) document.getElementById('fixedTail').value = preset.fixedTail || '';
+      if (document.getElementById('negative')) document.getElementById('negative').value = preset.negative || '';
+
+      if (preset.rawMode) setRawMode(preset.rawMode);
+      const mode = getRawMode();
+      document.getElementById('rawStyle').checked = (mode === 'style');
+      document.getElementById('rawRaw').checked = (mode === 'raw');
+
+      document.getElementById('seed').value = (preset.seed !== undefined && preset.seed !== null && preset.seed !== '') ? preset.seed : keepSeed;
+      document.getElementById('sref').value = (preset.sref !== undefined && preset.sref !== null && preset.sref !== '') ? preset.sref : keepSref;
+      document.getElementById('cref').value = (preset.cref !== undefined && preset.cref !== null && preset.cref !== '') ? preset.cref : keepCref;
+
+      syncCustomVisibility();
+      generatePrompt({ overwriteEditor: true, silentToast: true });
+      saveCurrentState();
+      showToast(`"${preset.name}" を読み込みました`);
+    }
+
+    // ===== JSON Export / Import =====
+    function openJsonModal(mode) {
+      const backdrop = document.getElementById('jsonBackdrop');
+      const textarea = document.getElementById('jsonTextarea');
+      const title = document.getElementById('jsonModalTitle');
+      const btnCopy = document.getElementById('btnJsonCopy');
+      const btnApply = document.getElementById('btnJsonApply');
+
+      backdrop.style.display = 'flex';
+      backdrop.setAttribute('aria-hidden', 'false');
+      backdrop.dataset.mode = mode;
+
+      if (mode === 'export') {
+        title.textContent = 'Preset JSON Export';
+        textarea.value = JSON.stringify(loadPresets(), null, 2);
+        textarea.readOnly = true;
+        btnCopy.style.display = 'inline-block';
+        btnApply.style.display = 'none';
+      } else {
+        title.textContent = 'Preset JSON Import';
+        textarea.value = '';
+        textarea.readOnly = false;
+        btnCopy.style.display = 'none';
+        btnApply.style.display = 'inline-block';
+      }
+    }
+
+    function closeJsonModal() {
+      const backdrop = document.getElementById('jsonBackdrop');
+      backdrop.style.display = 'none';
+      backdrop.setAttribute('aria-hidden', 'true');
+      backdrop.dataset.mode = '';
+    }
+
+    function copyJsonFromModal() {
+      const textarea = document.getElementById('jsonTextarea');
+      textarea.select();
+      textarea.setSelectionRange(0, textarea.value.length);
+      try {
+        document.execCommand('copy');
+        showToast('コピーしました');
+      } catch (e) {
+        showToast('コピーできませんでした（手動でコピーしてください）', 'error');
+      }
+      window.getSelection && window.getSelection().removeAllRanges();
+    }
+
+    function applyJsonImport() {
+      const textarea = document.getElementById('jsonTextarea');
+      let imported;
+      try {
+        imported = JSON.parse(textarea.value);
+      } catch (e) {
+        showToast('JSONの形式が正しくありません', 'error');
+        return;
+      }
+
+      // 配列 or {presets:[...]} 両対応
+      const arr = Array.isArray(imported) ? imported : (Array.isArray(imported?.presets) ? imported.presets : null);
+      if (!arr) {
+        showToast('JSONは配列（[]）または { presets: [] } である必要があります', 'error');
+        return;
+      }
+
+      const cleaned = [];
+      for (const p of arr) {
+        if (!p || typeof p !== 'object') continue;
+        const name = (p.name || '').toString().trim();
+        if (!name) continue;
+
+        // 旧キー互換（person 等）も吸収
+        cleaned.push({
+          name,
+          memo: (p.memo || '').toString(),
+          theme: (p.theme || '').toString(),
+
+          personTemplate: (p.personTemplate ?? p.person ?? '').toString(),
+          personTemplateCustom: (p.personTemplateCustom ?? p.personCustom ?? '').toString(),
+
+          composition: (p.composition || '').toString(),
+          compositionCustom: (p.compositionCustom || '').toString(),
+
+          angle: (p.angle || '').toString(),
+          angleCustom: (p.angleCustom || '').toString(),
+
+          lighting: (p.lighting || '').toString(),
+          lightingCustom: (p.lightingCustom || '').toString(),
+
+          background: (p.background || '').toString(),
+          backgroundCustom: (p.backgroundCustom || '').toString(),
+
+          ar: (p.ar || '9:16').toString(),
+          arCustom: (p.arCustom || '').toString(),
+
+          stylize: Number.isFinite(+p.stylize) ? +p.stylize : 100,
+          chaos: Number.isFinite(+p.chaos) ? +p.chaos : 0,
+          quality: Number.isFinite(+p.quality) ? +p.quality : 1,
+
+          raw: !!p.raw,
+          rawMode: (p.rawMode || getRawMode()).toString() === 'raw' ? 'raw' : 'style',
+
+          fixedTail: (p.fixedTail || '').toString(),
+          negative: (p.negative || '').toString(),
+          seed: (p.seed || '').toString(),
+          sref: (p.sref || '').toString(),
+          cref: (p.cref || '').toString(),
+        });
+      }
+
+      if (cleaned.length === 0) {
+        showToast('インポートできるプリセットが見つかりませんでした', 'error');
+        return;
+      }
+
+      const existing = loadPresets();
+      const map = new Map(existing.map(p => [p.name, p]));
+      for (const p of cleaned) map.set(p.name, p);
+      const merged = Array.from(map.values());
+
+      savePresets(merged);
+      displayPresets();
+      closeJsonModal();
+      showToast(`インポート完了（${cleaned.length}件）`);
     }
 
     // ===== エディタ保存/復元 =====
@@ -1013,16 +1323,21 @@
       }
     }
 
-    // 現在の状態を保存（localStorage）
+    // ===== 状態 保存/復元 =====
     function saveCurrentState() {
       const arVal = document.getElementById('ar').value;
       const currentState = {
         theme: document.getElementById('theme').value,
         personTemplate: document.getElementById('personTemplate').value,
+        personTemplateCustom: document.getElementById('personTemplateCustom') ? document.getElementById('personTemplateCustom').value : '',
         composition: document.getElementById('composition').value,
+        compositionCustom: document.getElementById('compositionCustom') ? document.getElementById('compositionCustom').value : '',
         angle: document.getElementById('angle').value,
+        angleCustom: document.getElementById('angleCustom') ? document.getElementById('angleCustom').value : '',
         lighting: document.getElementById('lighting').value,
+        lightingCustom: document.getElementById('lightingCustom') ? document.getElementById('lightingCustom').value : '',
         background: document.getElementById('background').value,
+        backgroundCustom: document.getElementById('backgroundCustom') ? document.getElementById('backgroundCustom').value : '',
         ar: arVal,
         arCustom: document.getElementById('arCustom') ? document.getElementById('arCustom').value : '',
         stylize: document.getElementById('stylize').value,
@@ -1032,67 +1347,71 @@
         rawMode: getRawMode(),
         seed: document.getElementById('seed').value,
         sref: document.getElementById('sref').value,
-        cref: document.getElementById('cref').value
+        cref: document.getElementById('cref').value,
+        fixedTail: document.getElementById('fixedTail') ? document.getElementById('fixedTail').value : '',
+        negative: document.getElementById('negative') ? document.getElementById('negative').value : '',
       };
       localStorage.setItem(KEY_LAST_STATE, JSON.stringify(currentState));
     }
 
-    // 前回の状態を復元
     function restoreLastState() {
       const stored = localStorage.getItem(KEY_LAST_STATE);
       if (!stored) return;
 
-      try {
-        const state = JSON.parse(stored);
+      const state = safeParseJSON(stored, null);
+      if (!state) return;
 
-        document.getElementById('theme').value = state.theme || '';
-        document.getElementById('personTemplate').value = state.personTemplate || '';
-        document.getElementById('composition').value = state.composition || 'close-up shot';
-        document.getElementById('angle').value = state.angle || 'front view';
-        document.getElementById('lighting').value = state.lighting || 'soft window light';
-        document.getElementById('background').value = state.background || 'city night background';
-        document.getElementById('ar').value = state.ar || '9:16';
+      document.getElementById('theme').value = state.theme || '';
+      document.getElementById('personTemplate').value = state.personTemplate || '';
+      document.getElementById('composition').value = state.composition || 'close-up shot';
+      document.getElementById('angle').value = state.angle || 'front view';
+      document.getElementById('lighting').value = state.lighting || 'soft window light';
+      document.getElementById('background').value = state.background || 'city night background';
+      document.getElementById('ar').value = state.ar || '9:16';
 
-        if (document.getElementById('arCustom')) {
-          document.getElementById('arCustom').value = state.arCustom || '';
-        }
-        document.getElementById('arCustomWrap').style.display =
-          (document.getElementById('ar').value === 'custom') ? 'block' : 'none';
+      document.getElementById('personTemplateCustom').value = state.personTemplateCustom || '';
+      document.getElementById('compositionCustom').value = state.compositionCustom || '';
+      document.getElementById('angleCustom').value = state.angleCustom || '';
+      document.getElementById('lightingCustom').value = state.lightingCustom || '';
+      document.getElementById('backgroundCustom').value = state.backgroundCustom || '';
 
-        document.getElementById('stylize').value = state.stylize || 100;
-        document.getElementById('chaos').value = state.chaos || 0;
-        document.getElementById('quality').value = state.quality || 1;
-        document.getElementById('raw').checked = state.raw || false;
-        document.getElementById('seed').value = state.seed || '';
-        document.getElementById('sref').value = state.sref || '';
-        document.getElementById('cref').value = state.cref || '';
+      document.getElementById('arCustom').value = state.arCustom || '';
+      document.getElementById('arCustomWrap').style.display =
+        (document.getElementById('ar').value === 'custom') ? 'block' : 'none';
 
-        if (state.rawMode) localStorage.setItem(KEY_RAW_MODE, state.rawMode);
+      document.getElementById('stylize').value = state.stylize ?? 100;
+      document.getElementById('chaos').value = state.chaos ?? 0;
+      document.getElementById('quality').value = state.quality ?? 1;
+      document.getElementById('raw').checked = state.raw || false;
 
-        const mode = getRawMode();
-        document.getElementById('rawStyle').checked = (mode === 'style');
-        document.getElementById('rawRaw').checked = (mode === 'raw');
+      if (document.getElementById('fixedTail')) document.getElementById('fixedTail').value = state.fixedTail || '';
+      if (document.getElementById('negative')) document.getElementById('negative').value = state.negative || '';
 
-      } catch (e) {
-        console.error('状態の復元に失敗しました:', e);
-      }
+      document.getElementById('seed').value = state.seed || '';
+      document.getElementById('sref').value = state.sref || '';
+      document.getElementById('cref').value = state.cref || '';
+
+      if (state.rawMode) setRawMode(state.rawMode);
+      const mode = getRawMode();
+      document.getElementById('rawStyle').checked = (mode === 'style');
+      document.getElementById('rawRaw').checked = (mode === 'raw');
+
+      syncCustomVisibility();
     }
 
-    // 自動保存のセットアップ
+    // ===== 自動保存 =====
     function setupAutoSave() {
       const fields = [
-        'theme', 'personTemplate', 'composition', 'angle',
-        'lighting', 'background', 'ar', 'arCustom', 'stylize',
-        'chaos', 'quality', 'raw', 'seed', 'sref', 'cref'
+        'theme', 'personTemplate', 'personTemplateCustom', 'composition', 'compositionCustom', 'angle', 'angleCustom',
+        'lighting', 'lightingCustom', 'background', 'backgroundCustom', 'ar', 'arCustom', 'stylize',
+        'chaos', 'quality', 'raw', 'fixedTail', 'negative', 'seed', 'sref', 'cref'
       ];
 
       fields.forEach((fieldId) => {
         const el = document.getElementById(fieldId);
         if (!el) return;
 
-        el.addEventListener('input', () => {
-          saveCurrentState();
-        });
+        el.addEventListener('input', () => saveCurrentState());
 
         el.addEventListener('change', () => {
           saveCurrentState();
@@ -1100,6 +1419,81 @@
         });
       });
     }
+
+    // ===== ボタン =====
+    function setupButtons() {
+      document.getElementById('btnGenerate').addEventListener('click', () => generatePrompt({ overwriteEditor:true }));
+      document.getElementById('btnSave').addEventListener('click', saveOrUpdatePreset);
+      document.getElementById('btnCopy').addEventListener('click', copyToClipboard);
+      document.getElementById('btnRebuild').addEventListener('click', () => generatePrompt({ overwriteEditor:true }));
+      document.getElementById('btnClear').addEventListener('click', clearAll);
+
+      // JSON Export / Import
+      document.getElementById('btnExportJson').addEventListener('click', () => openJsonModal('export'));
+      document.getElementById('btnImportJson').addEventListener('click', () => openJsonModal('import'));
+      document.getElementById('btnJsonClose').addEventListener('click', closeJsonModal);
+      document.getElementById('btnJsonCopy').addEventListener('click', copyJsonFromModal);
+      document.getElementById('btnJsonApply').addEventListener('click', applyJsonImport);
+      document.getElementById('jsonBackdrop').addEventListener('click', (e) => {
+        if (e.target && e.target.id === 'jsonBackdrop') closeJsonModal();
+      });
+
+      // RAW表記の切替
+      document.getElementById('rawStyle').addEventListener('change', () => {
+        if (document.getElementById('rawStyle').checked) setRawMode('style');
+        saveCurrentState();
+        generatePrompt({ silentToast:true, overwriteEditor:true });
+      });
+      document.getElementById('rawRaw').addEventListener('change', () => {
+        if (document.getElementById('rawRaw').checked) setRawMode('raw');
+        saveCurrentState();
+        generatePrompt({ silentToast:true, overwriteEditor:true });
+      });
+
+      // コピーヘルパー閉じる
+      document.getElementById('btnCopyHelpClose').addEventListener('click', hideCopyHelper);
+
+      // プリセット：読み込み & 削除（委譲）
+      document.getElementById('presetList').addEventListener('click', (e) => {
+        const delBtn = e.target.closest('button[data-action="delete"]');
+        if (delBtn) {
+          const idx = Number(delBtn.dataset.index);
+          const presets = loadPresets();
+          const target = presets[idx];
+          if (!target) return;
+          if (!confirm(`「${target.name}」を削除しますか？`)) return;
+          presets.splice(idx, 1);
+          savePresets(presets);
+          displayPresets();
+          return;
+        }
+
+        const item = e.target.closest('.preset-item');
+        if (!item) return;
+        const idx = Number(item.dataset.index);
+        if (!Number.isFinite(idx)) return;
+        loadPreset(idx);
+      });
+    }
+
+    // ===== 初期化 =====
+    window.addEventListener('DOMContentLoaded', () => {
+      // まずプリセットの存在を確定（ここで落ちない）
+      loadPresets();
+
+      setupButtons();
+      setupARCustomToggle();
+      setupCustomToggles();
+      setupAutoSave();
+
+      restoreLastState();
+      restoreEditorText();
+
+      displayPresets();
+
+      // 起動時に一回生成（エディタは上書きしない）
+      generatePrompt({ silentToast: true, overwriteEditor: false });
+    });
   </script>
 </body>
 </html>
