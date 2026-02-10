@@ -29,8 +29,8 @@
       padding: 30px;
       text-align: center;
     }
-    .header h1 { font-size: 2rem; margin-bottom: 10px; }
-    .header p { opacity: 0.9; font-size: 0.95rem; }
+    .header h1 { font-size: 2rem; margin-bottom: 8px; }
+    .header .sub-title { opacity: 0.9; font-size: 0.95rem; }
 
     .main-content {
       display: grid;
@@ -398,8 +398,8 @@
 <body>
   <div class="container">
     <div class="header">
-      <h1>🎨 Midjourney Prompt Builder</h1>
-      <p>プロフェッショナルなMidjourneyプロンプトを簡単に作成</p>
+      <h1>Midjourney Prompt Builder</h1>
+      <div class="sub-title">Midjourneyプロンプト生成ツール</div>
     </div>
 
     <div class="main-content">
@@ -491,9 +491,11 @@
           <label for="fixedTail">固定追記（任意）/ Fixed Tail</label>
           <input id="fixedTail" type="text" placeholder="例: cinematic film grain, ultra-detailed textures（※本文側に追加されます）" />
         </div>
+
+        <!-- ここは残す：自由入力（自動で --no は付与しない） -->
         <div class="form-group" style="margin-top:10px;">
-          <label for="negative">除外（任意）/ --no</label>
-          <input id="negative" type="text" placeholder="例: text, watermark, logo（--no は自動付与）" />
+          <label for="negative">除外（任意）</label>
+          <input id="negative" type="text" placeholder="例: --no text, watermark, logo" />
         </div>
 
         <div class="param-grid">
@@ -643,29 +645,29 @@
   </div>
 
   <script>
-    // ===== サンプルプリセット（20個） =====
+    // ===== サンプルプリセット（初期は空：20個は入れない） =====
     const samplePresets = [
-      { name:"サイバーパンク ポートレート", theme:"cyberpunk warrior with glowing tattoos", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"portrait shot", angle:"three-quarter view", lighting:"neon rim lighting", background:"city night background", ar:"9:16", stylize:150, chaos:20, quality:1, raw:true },
-      { name:"エレガント ファッション", theme:"elegant fashion model in luxury dress", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"full-body shot", angle:"front view", lighting:"studio beauty lighting", background:"minimal studio background", ar:"2:3", stylize:200, chaos:0, quality:2, raw:false },
-      { name:"ビジネス リーダー", theme:"confident CEO in modern office", personTemplate:"handsome man, sharp jawline, confident expression", composition:"mid-body shot", angle:"three-quarter view", lighting:"cinematic key light", background:"minimal studio background", ar:"16:9", stylize:100, chaos:0, quality:1, raw:true },
-      { name:"ファンタジー ウィザード", theme:"powerful wizard casting spell", personTemplate:"elderly person, wise expression, wrinkled face", composition:"portrait shot", angle:"front view", lighting:"cinematic key light", background:"city night background", ar:"1:1", stylize:250, chaos:30, quality:1, raw:false },
-      { name:"ストリート ポートレート", theme:"urban street style photographer", personTemplate:"handsome man, sharp jawline, confident expression", composition:"mid-body shot", angle:"side view", lighting:"soft window light", background:"cafe street background", ar:"4:3", stylize:150, chaos:10, quality:1, raw:true },
-      { name:"ナチュラル ビューティー", theme:"natural beauty in sunlight", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"close-up shot", angle:"three-quarter view", lighting:"soft window light", background:"minimal studio background", ar:"3:2", stylize:100, chaos:0, quality:2, raw:true },
-      { name:"子供の笑顔", theme:"happy child playing in park", personTemplate:"child, innocent eyes, playful expression", composition:"portrait shot", angle:"front view", lighting:"soft window light", background:"cafe street background", ar:"1:1", stylize:100, chaos:0, quality:1, raw:false },
-      { name:"ダークヒーロー", theme:"mysterious dark hero in shadows", personTemplate:"handsome man, sharp jawline, confident expression", composition:"full-body shot", angle:"three-quarter view", lighting:"neon rim lighting", background:"city night background", ar:"9:16", stylize:200, chaos:40, quality:1, raw:false },
-      { name:"エルフの戦士", theme:"elven warrior with bow and arrow", personTemplate:"fantasy character, unique features, mystical appearance", composition:"full-body shot", angle:"side view", lighting:"cinematic key light", background:"city night background", ar:"9:16", stylize:300, chaos:20, quality:1, raw:false },
-      { name:"カフェの少女", theme:"young woman reading book in cafe", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"mid-body shot", angle:"over-shoulder view", lighting:"soft window light", background:"cafe street background", ar:"16:9", stylize:150, chaos:0, quality:1, raw:true },
-      { name:"老賢者", theme:"ancient sage with wisdom in eyes", personTemplate:"elderly person, wise expression, wrinkled face", composition:"close-up shot", angle:"front view", lighting:"cinematic key light", background:"minimal studio background", ar:"1:1", stylize:200, chaos:10, quality:2, raw:false },
-      { name:"アクション ヒーロー", theme:"action hero in dynamic pose", personTemplate:"handsome man, sharp jawline, confident expression", composition:"full-body shot", angle:"three-quarter view", lighting:"cinematic key light", background:"city night background", ar:"16:9", stylize:150, chaos:30, quality:1, raw:true },
-      { name:"魔法少女", theme:"magical girl with glowing powers", personTemplate:"fantasy character, unique features, mystical appearance", composition:"portrait shot", angle:"front view", lighting:"neon rim lighting", background:"city night background", ar:"9:16", stylize:250, chaos:20, quality:1, raw:false },
-      { name:"プロフェッショナル", theme:"professional business portrait", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"portrait shot", angle:"front view", lighting:"studio beauty lighting", background:"minimal studio background", ar:"3:2", stylize:100, chaos:0, quality:2, raw:true },
-      { name:"サムライ", theme:"samurai warrior with katana", personTemplate:"handsome man, sharp jawline, confident expression", composition:"full-body shot", angle:"side view", lighting:"cinematic key light", background:"minimal studio background", ar:"9:16", stylize:200, chaos:20, quality:1, raw:false },
-      { name:"天使", theme:"angel with glowing wings", personTemplate:"fantasy character, unique features, mystical appearance", composition:"full-body shot", angle:"front view", lighting:"soft window light", background:"minimal studio background", ar:"2:3", stylize:300, chaos:10, quality:1, raw:false },
-      { name:"ロックスター", theme:"rock star performing on stage", personTemplate:"handsome man, sharp jawline, confident expression", composition:"mid-body shot", angle:"three-quarter view", lighting:"neon rim lighting", background:"city night background", ar:"16:9", stylize:200, chaos:30, quality:1, raw:false },
-      { name:"スパイ", theme:"secret agent in tactical gear", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"full-body shot", angle:"three-quarter view", lighting:"cinematic key light", background:"city night background", ar:"9:16", stylize:150, chaos:20, quality:1, raw:true },
-      { name:"ドラゴンライダー", theme:"dragon rider with magical armor", personTemplate:"fantasy character, unique features, mystical appearance", composition:"portrait shot", angle:"front view", lighting:"cinematic key light", background:"city night background", ar:"1:1", stylize:300, chaos:40, quality:1, raw:false },
-      { name:"カフェオーナー", theme:"friendly cafe owner serving coffee", personTemplate:"elderly person, wise expression, wrinkled face", composition:"mid-body shot", angle:"over-shoulder view", lighting:"soft window light", background:"cafe street background", ar:"4:3", stylize:100, chaos:0, quality:1, raw:true }
-    ];
+  { name:"Cyberpunk Portrait / サイバーパンクポートレート", memo:"ネオン×人物の定番。発光タトゥーや近未来感を安定させる。", theme:"cyberpunk warrior with glowing tattoos", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"portrait shot", angle:"three-quarter view", lighting:"neon rim lighting", background:"city night background", ar:"9:16", stylize:150, chaos:20, quality:1, raw:true },
+  { name:"Elegant Fashion / エレガントファッション", memo:"スタジオ背景で服・シルエット重視。全身写真風。", theme:"elegant fashion model in luxury dress", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"full-body shot", angle:"front view", lighting:"studio beauty lighting", background:"minimal studio background", ar:"2:3", stylize:200, chaos:0, quality:2, raw:false },
+  { name:"Business Leader / ビジネスリーダー", memo:"清潔感ある人物ポートレート。オフィス系の素材づくりに。", theme:"confident CEO in modern office", personTemplate:"handsome man, sharp jawline, confident expression", composition:"mid-body shot", angle:"three-quarter view", lighting:"cinematic key light", background:"minimal studio background", ar:"16:9", stylize:100, chaos:0, quality:1, raw:true },
+  { name:"Fantasy Wizard / ファンタジーウィザード", memo:"魔法演出＋年配顔。世界観の強い人物に寄せる。", theme:"powerful wizard casting spell", personTemplate:"elderly person, wise expression, wrinkled face", composition:"portrait shot", angle:"front view", lighting:"cinematic key light", background:"city night background", ar:"1:1", stylize:250, chaos:30, quality:1, raw:false },
+  { name:"Street Portrait / ストリートポートレート", memo:"街スナップ風。自然光寄りで“作り込みすぎない”人物。", theme:"urban street style photographer", personTemplate:"handsome man, sharp jawline, confident expression", composition:"mid-body shot", angle:"side view", lighting:"soft window light", background:"cafe street background", ar:"4:3", stylize:150, chaos:10, quality:1, raw:true },
+  { name:"Natural Beauty / ナチュラルビューティー", memo:"柔らかい光で肌と表情をきれいに。クローズアップ向け。", theme:"natural beauty in sunlight", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"close-up shot", angle:"three-quarter view", lighting:"soft window light", background:"minimal studio background", ar:"3:2", stylize:100, chaos:0, quality:2, raw:true },
+  { name:"Child Smile / 子供の笑顔", memo:"明るい雰囲気の子供人物。公園・日常系に。", theme:"happy child playing in park", personTemplate:"child, innocent eyes, playful expression", composition:"portrait shot", angle:"front view", lighting:"soft window light", background:"cafe street background", ar:"1:1", stylize:100, chaos:0, quality:1, raw:false },
+  { name:"Dark Hero / ダークヒーロー", memo:"影・逆光でシリアス寄り。映画風の人物に。", theme:"mysterious dark hero in shadows", personTemplate:"handsome man, sharp jawline, confident expression", composition:"full-body shot", angle:"three-quarter view", lighting:"neon rim lighting", background:"city night background", ar:"9:16", stylize:200, chaos:40, quality:1, raw:false },
+  { name:"Elf Warrior / エルフの戦士", memo:"ファンタジー人物の定番。弓や装備が映える。", theme:"elven warrior with bow and arrow", personTemplate:"fantasy character, unique features, mystical appearance", composition:"full-body shot", angle:"side view", lighting:"cinematic key light", background:"city night background", ar:"9:16", stylize:300, chaos:20, quality:1, raw:false },
+  { name:"Cafe Girl / カフェの少女", memo:"カフェ背景＋柔らかい光。SNS向け人物素材に。", theme:"young woman reading book in cafe", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"mid-body shot", angle:"over-shoulder view", lighting:"soft window light", background:"cafe street background", ar:"16:9", stylize:150, chaos:0, quality:1, raw:true },
+  { name:"Ancient Sage / 老賢者", memo:"しわ・年齢表現の確認用。顔ディテール重視。", theme:"ancient sage with wisdom in eyes", personTemplate:"elderly person, wise expression, wrinkled face", composition:"close-up shot", angle:"front view", lighting:"cinematic key light", background:"minimal studio background", ar:"1:1", stylize:200, chaos:10, quality:2, raw:false },
+  { name:"Action Hero / アクションヒーロー", memo:"動きのある人物を作るベース。ポーズ検証に。", theme:"action hero in dynamic pose", personTemplate:"handsome man, sharp jawline, confident expression", composition:"full-body shot", angle:"three-quarter view", lighting:"cinematic key light", background:"city night background", ar:"16:9", stylize:150, chaos:30, quality:1, raw:true },
+  { name:"Magical Girl / 魔法少女", memo:"発光表現×キャラ感の確認。ネオン系に強い。", theme:"magical girl with glowing powers", personTemplate:"fantasy character, unique features, mystical appearance", composition:"portrait shot", angle:"front view", lighting:"neon rim lighting", background:"city night background", ar:"9:16", stylize:250, chaos:20, quality:1, raw:false },
+  { name:"Professional Portrait / プロフェッショナル", memo:"ビジネス用途の“ちゃんとした”人物。プロフィール写真風。", theme:"professional business portrait", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"portrait shot", angle:"front view", lighting:"studio beauty lighting", background:"minimal studio background", ar:"3:2", stylize:100, chaos:0, quality:2, raw:true },
+  { name:"Samurai / サムライ", memo:"和風アクション人物。刀や衣装の見せ方確認に。", theme:"samurai warrior with katana", personTemplate:"handsome man, sharp jawline, confident expression", composition:"full-body shot", angle:"side view", lighting:"cinematic key light", background:"minimal studio background", ar:"9:16", stylize:200, chaos:20, quality:1, raw:false },
+  { name:"Angel / 天使", memo:"白・光・翼の表現確認。ファンタジー人物に。", theme:"angel with glowing wings", personTemplate:"fantasy character, unique features, mystical appearance", composition:"full-body shot", angle:"front view", lighting:"soft window light", background:"minimal studio background", ar:"2:3", stylize:300, chaos:10, quality:1, raw:false },
+  { name:"Rock Star / ロックスター", memo:"ステージ光の演出確認。派手な人物カット向け。", theme:"rock star performing on stage", personTemplate:"handsome man, sharp jawline, confident expression", composition:"mid-body shot", angle:"three-quarter view", lighting:"neon rim lighting", background:"city night background", ar:"16:9", stylize:200, chaos:30, quality:1, raw:false },
+  { name:"Spy / スパイ", memo:"タクティカル装備＋緊張感。映画スチル風に。", theme:"secret agent in tactical gear", personTemplate:"beautiful young woman, detailed face, expressive eyes", composition:"full-body shot", angle:"three-quarter view", lighting:"cinematic key light", background:"city night background", ar:"9:16", stylize:150, chaos:20, quality:1, raw:true },
+  { name:"Dragon Rider / ドラゴンライダー", memo:"騎乗・鎧・魔法の人物向け。迫力重視の検証用。", theme:"dragon rider with magical armor", personTemplate:"fantasy character, unique features, mystical appearance", composition:"portrait shot", angle:"front view", lighting:"cinematic key light", background:"city night background", ar:"1:1", stylize:300, chaos:40, quality:1, raw:false },
+  { name:"Cafe Owner / カフェオーナー", memo:"日常人物（接客）向け。温かい空気感の確認用。", theme:"friendly cafe owner serving coffee", personTemplate:"elderly person, wise expression, wrinkled face", composition:"mid-body shot", angle:"over-shoulder view", lighting:"soft window light", background:"cafe street background", ar:"4:3", stylize:100, chaos:0, quality:1, raw:true }
+];
 
     // ===== 状態管理キー =====
     const KEY_PRESETS   = 'mjPresets';
@@ -679,7 +681,113 @@
       try { return JSON.parse(raw); } catch { return fallback; }
     }
 
-    // ===== RAW表記 =====
+    
+    // ===== プリセット名・メモの自動補正（既存データの移行） =====
+    // 目的：既存プリセット（例:「ドラゴンライダー」「カフェオーナー」）も
+    // 「English Title / 日本語サブ」形式 + memo 付きに自動変換する
+    const PRESET_NAME_MAP = {
+  "サイバーパンク ポートレート": { en:"Cyberpunk Portrait", jp:"サイバーパンクポートレート", memo:"ネオン×人物の定番。発光タトゥーや近未来感を安定させる。" },
+  "サイバーパンクポートレート": { en:"Cyberpunk Portrait", jp:"サイバーパンクポートレート", memo:"ネオン×人物の定番。発光タトゥーや近未来感を安定させる。" },
+  "Cyberpunk Portrait / サイバーパンクポートレート": { en:"Cyberpunk Portrait", jp:"サイバーパンクポートレート", memo:"ネオン×人物の定番。発光タトゥーや近未来感を安定させる。" },
+  "エレガント ファッション": { en:"Elegant Fashion", jp:"エレガントファッション", memo:"スタジオ背景で服・シルエット重視。全身写真風。" },
+  "Elegant Fashion / エレガントファッション": { en:"Elegant Fashion", jp:"エレガントファッション", memo:"スタジオ背景で服・シルエット重視。全身写真風。" },
+  "ビジネス リーダー": { en:"Business Leader", jp:"ビジネスリーダー", memo:"清潔感ある人物ポートレート。オフィス系の素材づくりに。" },
+  "Business Leader / ビジネスリーダー": { en:"Business Leader", jp:"ビジネスリーダー", memo:"清潔感ある人物ポートレート。オフィス系の素材づくりに。" },
+  "ファンタジー ウィザード": { en:"Fantasy Wizard", jp:"ファンタジーウィザード", memo:"魔法演出＋年配顔。世界観の強い人物に寄せる。" },
+  "Fantasy Wizard / ファンタジーウィザード": { en:"Fantasy Wizard", jp:"ファンタジーウィザード", memo:"魔法演出＋年配顔。世界観の強い人物に寄せる。" },
+  "ストリート ポートレート": { en:"Street Portrait", jp:"ストリートポートレート", memo:"街スナップ風。自然光寄りで“作り込みすぎない”人物。" },
+  "Street Portrait / ストリートポートレート": { en:"Street Portrait", jp:"ストリートポートレート", memo:"街スナップ風。自然光寄りで“作り込みすぎない”人物。" },
+  "ナチュラル ビューティー": { en:"Natural Beauty", jp:"ナチュラルビューティー", memo:"柔らかい光で肌と表情をきれいに。クローズアップ向け。" },
+  "Natural Beauty / ナチュラルビューティー": { en:"Natural Beauty", jp:"ナチュラルビューティー", memo:"柔らかい光で肌と表情をきれいに。クローズアップ向け。" },
+  "子供の笑顔": { en:"Child Smile", jp:"子供の笑顔", memo:"明るい雰囲気の子供人物。公園・日常系に。" },
+  "Child Smile / 子供の笑顔": { en:"Child Smile", jp:"子供の笑顔", memo:"明るい雰囲気の子供人物。公園・日常系に。" },
+  "ダークヒーロー": { en:"Dark Hero", jp:"ダークヒーロー", memo:"影・逆光でシリアス寄り。映画風の人物に。" },
+  "Dark Hero / ダークヒーロー": { en:"Dark Hero", jp:"ダークヒーロー", memo:"影・逆光でシリアス寄り。映画風の人物に。" },
+  "エルフの戦士": { en:"Elf Warrior", jp:"エルフの戦士", memo:"ファンタジー人物の定番。弓や装備が映える。" },
+  "Elf Warrior / エルフの戦士": { en:"Elf Warrior", jp:"エルフの戦士", memo:"ファンタジー人物の定番。弓や装備が映える。" },
+  "カフェの少女": { en:"Cafe Girl", jp:"カフェの少女", memo:"カフェ背景＋柔らかい光。SNS向け人物素材に。" },
+  "Cafe Girl / カフェの少女": { en:"Cafe Girl", jp:"カフェの少女", memo:"カフェ背景＋柔らかい光。SNS向け人物素材に。" },
+  "老賢者": { en:"Ancient Sage", jp:"老賢者", memo:"しわ・年齢表現の確認用。顔ディテール重視。" },
+  "Ancient Sage / 老賢者": { en:"Ancient Sage", jp:"老賢者", memo:"しわ・年齢表現の確認用。顔ディテール重視。" },
+  "アクション ヒーロー": { en:"Action Hero", jp:"アクションヒーロー", memo:"動きのある人物を作るベース。ポーズ検証に。" },
+  "Action Hero / アクションヒーロー": { en:"Action Hero", jp:"アクションヒーロー", memo:"動きのある人物を作るベース。ポーズ検証に。" },
+  "魔法少女": { en:"Magical Girl", jp:"魔法少女", memo:"発光表現×キャラ感の確認。ネオン系に強い。" },
+  "Magical Girl / 魔法少女": { en:"Magical Girl", jp:"魔法少女", memo:"発光表現×キャラ感の確認。ネオン系に強い。" },
+  "プロフェッショナル": { en:"Professional Portrait", jp:"プロフェッショナル", memo:"ビジネス用途の“ちゃんとした”人物。プロフィール写真風。" },
+  "Professional Portrait / プロフェッショナル": { en:"Professional Portrait", jp:"プロフェッショナル", memo:"ビジネス用途の“ちゃんとした”人物。プロフィール写真風。" },
+  "サムライ": { en:"Samurai", jp:"サムライ", memo:"和風アクション人物。刀や衣装の見せ方確認に。" },
+  "Samurai / サムライ": { en:"Samurai", jp:"サムライ", memo:"和風アクション人物。刀や衣装の見せ方確認に。" },
+  "天使": { en:"Angel", jp:"天使", memo:"白・光・翼の表現確認。ファンタジー人物に。" },
+  "Angel / 天使": { en:"Angel", jp:"天使", memo:"白・光・翼の表現確認。ファンタジー人物に。" },
+  "ロックスター": { en:"Rock Star", jp:"ロックスター", memo:"ステージ光の演出確認。派手な人物カット向け。" },
+  "Rock Star / ロックスター": { en:"Rock Star", jp:"ロックスター", memo:"ステージ光の演出確認。派手な人物カット向け。" },
+  "スパイ": { en:"Spy", jp:"スパイ", memo:"タクティカル装備＋緊張感。映画スチル風に。" },
+  "Spy / スパイ": { en:"Spy", jp:"スパイ", memo:"タクティカル装備＋緊張感。映画スチル風に。" },
+  "ドラゴンライダー": { en:"Dragon Rider", jp:"ドラゴンライダー", memo:"騎乗・鎧・魔法の人物向け。迫力重視の検証用。" },
+  "Dragon Rider / ドラゴンライダー": { en:"Dragon Rider", jp:"ドラゴンライダー", memo:"騎乗・鎧・魔法の人物向け。迫力重視の検証用。" },
+  "カフェオーナー": { en:"Cafe Owner", jp:"カフェオーナー", memo:"日常人物（接客）向け。温かい空気感の確認用。" },
+  "Cafe Owner / カフェオーナー": { en:"Cafe Owner", jp:"カフェオーナー", memo:"日常人物（接客）向け。温かい空気感の確認用。" },
+  "Cinematic Portrait Soft": { en:"Cinematic Portrait", jp:"映画風ポートレート", memo:"柔らかい映画風ポートレート。人物の質感重視。自然光＋浅い被写界深度で使う基本プリセット。" },
+  "Cinematic Portrait / 映画風ポートレート": { en:"Cinematic Portrait", jp:"映画風ポートレート", memo:"柔らかい映画風ポートレート。人物の質感重視。自然光＋浅い被写界深度で使う基本プリセット。" },
+  "Cinematic Portrait Soft / 映画風ポートレート": { en:"Cinematic Portrait", jp:"映画風ポートレート", memo:"柔らかい映画風ポートレート。人物の質感重視。自然光＋浅い被写界深度で使う基本プリセット。" },
+  "Instagram Model": { en:"Instagram Model", jp:"SNSモデル", memo:"SNS・インフルエンサー系人物。抜け感のあるポーズと自然な光。" },
+  "Instagram Model / SNSモデル": { en:"Instagram Model", jp:"SNSモデル", memo:"SNS・インフルエンサー系人物。抜け感のあるポーズと自然な光。" },
+};
+
+    function isCombinedName(name){
+      return (name || '').includes(' / ');
+    }
+
+    function migrateOnePreset(p){
+      if (!p || typeof p !== 'object') return p;
+
+      const nameRaw = (p.name ?? '').toString().trim();
+      if (!nameRaw) return p;
+
+      // 1) name の統一
+      if (PRESET_NAME_MAP[nameRaw]) {
+        const m = PRESET_NAME_MAP[nameRaw];
+        p.name = `${m.en} / ${m.jp}`;
+        // memo の補完
+        if (!p.memo || !String(p.memo).trim()) p.memo = m.memo;
+        return p;
+      }
+
+      // すでに "EN / JP" 形式の場合：memoだけ補完
+      if (isCombinedName(nameRaw)) {
+        if (PRESET_NAME_MAP[nameRaw] && (!p.memo || !String(p.memo).trim())) {
+          p.memo = PRESET_NAME_MAP[nameRaw].memo;
+        }
+        return p;
+      }
+
+      // 2) 例外：一部の英語名のみ → memo補完（該当があれば）
+      // （必要なら後で追加）
+      return p;
+    }
+
+    function migratePresetsIfNeeded(presets){
+      if (!Array.isArray(presets)) return presets;
+      let changed = false;
+
+      const migrated = presets.map(orig => {
+        const p = { ...orig };
+        const beforeName = (p.name ?? '').toString();
+        const beforeMemo = (p.memo ?? '').toString();
+
+        migrateOnePreset(p);
+
+        const afterName = (p.name ?? '').toString();
+        const afterMemo = (p.memo ?? '').toString();
+
+        if (beforeName !== afterName || beforeMemo !== afterMemo) changed = true;
+        return p;
+      });
+
+      return { presets: migrated, changed };
+    }
+
+// ===== RAW表記 =====
     function getRawMode() {
       const stored = localStorage.getItem(KEY_RAW_MODE);
       return stored === 'raw' ? 'raw' : 'style';
@@ -694,9 +802,16 @@
       const raw = localStorage.getItem(KEY_PRESETS);
       const parsed = safeParseJSON(raw, null);
 
-      if (Array.isArray(parsed)) return parsed;
+      // 既存データがあれば、必要に応じて「名前形式 + memo」を自動補正
+      if (Array.isArray(parsed)) {
+        const mig = migratePresetsIfNeeded(parsed);
+        if (mig && mig.changed) {
+          localStorage.setItem(KEY_PRESETS, JSON.stringify(mig.presets));
+        }
+        return mig ? mig.presets : parsed;
+      }
 
-      // 初回はサンプルを保存して返す（空でもOKにしたいならここを [] にしてもOK）
+      // 初回は空配列で開始
       localStorage.setItem(KEY_PRESETS, JSON.stringify(samplePresets));
       return [...samplePresets];
     }
@@ -758,7 +873,7 @@
       }
     }
 
-    // ===== リセット（混在防止） =====
+    // ===== リセット =====
     function resetPromptSettings({ keepRefs } = { keepRefs: true }) {
       const theme = document.getElementById('theme');
       if (theme) theme.value = '';
@@ -885,6 +1000,8 @@
         : backgroundSel;
 
       const fixedTail = (document.getElementById('fixedTail') ? document.getElementById('fixedTail').value.trim() : '');
+
+      // ★ 自由入力：そのまま末尾に追記（自動で --no は付与しない）
       const negative = (document.getElementById('negative') ? document.getElementById('negative').value.trim() : '');
 
       const promptParts = [];
@@ -917,10 +1034,6 @@
       if (stylize !== '' && stylize !== null && stylize !== undefined) params.push(`--stylize ${stylize}`);
       if (chaos && chaos != 0) params.push(`--chaos ${chaos}`);
       if (quality) params.push(`--quality ${quality}`);
-      if (negative) {
-        const noStr = negative.startsWith('--no') ? negative : `--no ${negative}`;
-        params.push(noStr);
-      }
 
       if (rawEnabled) {
         const mode = getRawMode();
@@ -930,6 +1043,9 @@
       if (seed) params.push(`--seed ${seed}`);
       if (sref) params.push(`--sref ${sref}`);
       if (cref) params.push(`--cref ${cref}`);
+
+      // ★ ここで自由追記を最後に入れる
+      if (negative) params.push(negative);
 
       const fullPrompt = prompt + (params.length > 0 ? ' ' + params.join(' ') : '');
       return fullPrompt || 'プロンプトを生成するには、少なくともテーマを入力してください。';
@@ -1083,7 +1199,7 @@
       setTimeout(() => { toast.style.display = 'none'; }, 2500);
     }
 
-    // ===== Clear（バグっていたので全面修正） =====
+    // ===== Clear =====
     function clearAll() {
       resetPromptSettings({ keepRefs: false });
 
@@ -1240,7 +1356,6 @@
         return;
       }
 
-      // 配列 or {presets:[...]} 両対応
       const arr = Array.isArray(imported) ? imported : (Array.isArray(imported?.presets) ? imported.presets : null);
       if (!arr) {
         showToast('JSONは配列（[]）または { presets: [] } である必要があります', 'error');
@@ -1253,7 +1368,6 @@
         const name = (p.name || '').toString().trim();
         if (!name) continue;
 
-        // 旧キー互換（person 等）も吸収
         cleaned.push({
           name,
           memo: (p.memo || '').toString(),
@@ -1478,7 +1592,6 @@
 
     // ===== 初期化 =====
     window.addEventListener('DOMContentLoaded', () => {
-      // まずプリセットの存在を確定（ここで落ちない）
       loadPresets();
 
       setupButtons();
