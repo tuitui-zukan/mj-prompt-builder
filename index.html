@@ -393,7 +393,36 @@
       .output-editor { max-height: 320px; }
       button { min-width: 100%; }
     }
-  </style>
+  
+    .preset-search{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      margin: 6px 0 12px 0;
+    }
+    .preset-search input{
+      flex:1;
+      padding: 10px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      background: #fff;
+    }
+    .preset-search input:focus{
+      outline:none;
+      border-color:#667eea;
+    }
+    .preset-clear{
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: 2px solid #e0e0e0;
+      background: #fff;
+      cursor:pointer;
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+</style>
 </head>
 <body>
   <div class="container">
@@ -405,15 +434,15 @@
     <div class="main-content">
       <!-- 左側：入力フォーム -->
       <div class="section">
-        <h2>📝 プロンプト設定</h2>
+        <h2>📝 Prompt Settings / プロンプト設定</h2>
 
         <div class="form-group">
-          <label for="theme">テーマ / Theme</label>
+          <label for="theme">Theme / テーマ</label>
           <input type="text" id="theme" placeholder="例: a cyberpunk warrior in neon city" />
         </div>
 
         <div class="form-group">
-          <label for="personTemplate">人物テンプレート / Person Template</label>
+          <label for="personTemplate">Person Template / 人物テンプレート</label>
           <select id="personTemplate">
             <option value="">なし / None</option>
             <option value="beautiful young woman, detailed face, expressive eyes">Beautiful Young Woman</option>
@@ -421,7 +450,7 @@
             <option value="elderly person, wise expression, wrinkled face">Elderly Person</option>
             <option value="child, innocent eyes, playful expression">Child</option>
             <option value="fantasy character, unique features, mystical appearance">Fantasy Character</option>
-            <option value="custom">自由入力 / Custom…</option>
+            <option value="custom">Custom / 自由入力…</option>
           </select>
           <div id="personTemplateCustomWrap" style="display:none; margin-top:8px;">
             <input id="personTemplateCustom" type="text" placeholder="例: a realistic young japanese woman, detailed facial features" style="width:100%;">
@@ -430,13 +459,13 @@
 
         <div class="param-grid">
           <div class="form-group">
-            <label for="composition">構図 / Composition</label>
+            <label for="composition">Composition / 構図</label>
             <select id="composition">
               <option value="close-up shot">Close-up</option>
               <option value="portrait shot">Portrait</option>
               <option value="mid-body shot">Mid-body</option>
               <option value="full-body shot">Full-body</option>
-              <option value="custom">自由入力 / Custom…</option>
+              <option value="custom">Custom / 自由入力…</option>
             </select>
             <div id="compositionCustomWrap" style="display:none; margin-top:8px;">
               <input id="compositionCustom" type="text" placeholder="例: close-up shot / mid-body shot / full-body shot" style="width:100%;">
@@ -444,13 +473,13 @@
           </div>
 
           <div class="form-group">
-            <label for="angle">アングル / Angle</label>
+            <label for="angle">Angle / アングル</label>
             <select id="angle">
               <option value="front view">Front</option>
               <option value="three-quarter view">Three-quarter</option>
               <option value="side view">Side</option>
               <option value="over-shoulder view">Over-shoulder</option>
-              <option value="custom">自由入力 / Custom…</option>
+              <option value="custom">Custom / 自由入力…</option>
             </select>
             <div id="angleCustomWrap" style="display:none; margin-top:8px;">
               <input id="angleCustom" type="text" placeholder="例: three-quarter view / low angle / top-down" style="width:100%;">
@@ -459,13 +488,13 @@
         </div>
 
         <div class="form-group">
-          <label for="lighting">ライティング / Lighting</label>
+          <label for="lighting">Lighting / ライティング</label>
           <select id="lighting">
             <option value="soft window light">Soft Window Light</option>
             <option value="neon rim lighting">Neon Rim Lighting</option>
             <option value="cinematic key light">Cinematic Key Light</option>
             <option value="studio beauty lighting">Studio Beauty Lighting</option>
-            <option value="custom">自由入力 / Custom…</option>
+            <option value="custom">Custom / 自由入力…</option>
           </select>
           <div id="lightingCustomWrap" style="display:none; margin-top:8px;">
             <input id="lightingCustom" type="text" placeholder="例: soft window light / neon rim lighting / cinematic lighting" style="width:100%;">
@@ -473,34 +502,34 @@
         </div>
 
         <div class="form-group">
-          <label for="background">背景 / Background</label>
+          <label for="background">Background / 背景</label>
           <select id="background">
             <option value="city night background">City Night</option>
             <option value="minimal studio background">Minimal Studio</option>
             <option value="cafe street background">Cafe Street</option>
-            <option value="custom">自由入力 / Custom…</option>
+            <option value="custom">Custom / 自由入力…</option>
           </select>
           <div id="backgroundCustomWrap" style="display:none; margin-top:8px;">
             <input id="backgroundCustom" type="text" placeholder="例: city night background / studio backdrop / shrine at night" style="width:100%;">
           </div>
         </div>
 
-        <h2 style="margin-top: 30px;">⚙️ Midjourneyパラメータ</h2>
+        <h2 style="margin-top: 30px;">⚙️ Midjourney Parameters / Midjourneyパラメータ</h2>
 
         <div class="form-group" style="margin-top:10px;">
-          <label for="fixedTail">固定追記（任意）/ Fixed Tail</label>
+          <label for="fixedTail">Fixed Tail / 固定追記（任意）</label>
           <input id="fixedTail" type="text" placeholder="例: cinematic film grain, ultra-detailed textures（※本文側に追加されます）" />
         </div>
 
         <!-- ここは残す：自由入力（自動で --no は付与しない） -->
         <div class="form-group" style="margin-top:10px;">
-          <label for="negative">除外（任意）</label>
+          <label for="negative">Exclude (optional) / 除外（任意）</label>
           <input id="negative" type="text" placeholder="例: --no text, watermark, logo" />
         </div>
 
         <div class="param-grid">
           <div class="form-group">
-            <label for="ar">アスペクト比 / --ar</label>
+            <label for="ar">--ar / アスペクト比</label>
             <select id="ar">
               <option value="1:1">1:1 (正方形)</option>
               <option value="16:9">16:9 (横長)</option>
@@ -519,19 +548,19 @@
           </div>
 
           <div class="form-group">
-            <label for="stylize">スタイライズ / --stylize</label>
+            <label for="stylize">--stylize / スタイライズ</label>
             <input type="number" id="stylize" min="0" max="1000" value="100" step="50" />
             <div class="small-text">0-1000 (デフォルト: 100)</div>
           </div>
 
           <div class="form-group">
-            <label for="chaos">カオス / --chaos</label>
+            <label for="chaos">--chaos / カオス</label>
             <input type="number" id="chaos" min="0" max="100" value="0" step="10" />
             <div class="small-text">0-100 (デフォルト: 0)</div>
           </div>
 
           <div class="form-group">
-            <label for="quality">品質 / --quality</label>
+            <label for="quality">--quality / 品質</label>
             <select id="quality">
               <option value="0.25">0.25 (低速)</option>
               <option value="0.5">0.5</option>
@@ -543,8 +572,8 @@
 
         <!-- RAW 表記切替（--style raw / --raw） -->
         <div class="form-group">
-          <label>RAW表記（切替）</label>
-          <div class="pill-row" role="radiogroup" aria-label="RAW表記切替">
+          <label>RAW Mode (toggle) / RAW表記（切替）</label>
+          <div class="pill-row" role="radiogroup" aria-label="RAW Mode toggle / RAW表記切替">
             <label class="pill" for="rawStyle">
               <input type="radio" name="rawMode" id="rawStyle" value="style" checked />
               <strong>--style raw</strong>
@@ -556,63 +585,69 @@
           </div>
           <div class="checkbox-group" style="margin-top: 10px;">
             <input type="checkbox" id="raw" />
-            <label for="raw" style="margin-bottom: 0;">RAWモードを有効化</label>
+            <label for="raw" style="margin-bottom: 0;">Enable RAW mode / RAWモードを有効化</label>
           </div>
-          <div class="small-text">Midjourney側で自動変換される場合があります（どちらでもOK）。</div>
+          <div class="small-text">Midjourney may auto-convert this (either is OK) / Midjourney側で自動変換される場合があります（どちらでもOK）。</div>
         </div>
 
         <div class="form-group">
-          <label for="seed">シード / --seed (オプション)</label>
+          <label for="seed">--seed (optional) / シード</label>
           <input type="number" id="seed" placeholder="例: 12345" />
-          <div class="small-text">同じシードで一貫した結果</div>
+          <div class="small-text">Consistent results with the same seed / 同じシードで一貫した結果</div>
         </div>
 
         <div class="form-group">
-          <label for="sref">スタイル参照 / --sref (オプション)</label>
-          <input type="text" id="sref" placeholder="画像URL" />
-          <div class="small-text">スタイル参照画像のURL</div>
+          <label for="sref">--sref (optional) / スタイル参照</label>
+          <input type="text" id="sref" placeholder="Image URL / 画像URL" />
+          <div class="small-text">Style reference image URL / スタイル参照画像のURL</div>
         </div>
 
         <div class="form-group">
-          <label for="cref">キャラクター参照 / --cref (オプション)</label>
-          <input type="text" id="cref" placeholder="画像URL" />
-          <div class="small-text">キャラクター参照画像のURL</div>
+          <label for="cref">--cref (optional) / キャラクター参照</label>
+          <input type="text" id="cref" placeholder="Image URL / 画像URL" />
+          <div class="small-text">Character reference image URL / キャラクター参照画像のURL</div>
         </div>
 
         <div class="divider"></div>
 
         <div class="button-group">
-          <button class="btn-primary" type="button" id="btnGenerate">✨ Generate</button>
-          <button class="btn-success" type="button" id="btnSave">💾 Save / Update</button>
-          <button class="btn-danger" type="button" id="btnClear">🧹 Clear</button>
+          <button class="btn-primary" type="button" id="btnGenerate">✨ Generate / 生成</button>
+          <button class="btn-success" type="button" id="btnSave">💾 Save / Update / 保存・更新</button>
+          <button class="btn-danger" type="button" id="btnClear">🧹 Clear / クリア</button>
         </div>
         <div class="small-text" style="margin-top:8px;">
-          ※ Saveは新規保存。すでに同名がある場合は上書き更新します。
+          ※ Save creates a new preset; if the same name exists, it overwrites. / Saveは新規保存。すでに同名がある場合は上書き更新します。
         </div>
       </div>
 
       <!-- 右側：出力とプリセット -->
       <div class="section">
-        <h2>🎯 生成されたプロンプト（編集OK）</h2>
+        <h2>🎯 Generated Prompt (Editable) / 生成されたプロンプト（編集OK）</h2>
 
         <textarea class="output-editor" id="outputEditor" spellcheck="false">ここに生成されたプロンプトが表示されます...</textarea>
 
         <div class="button-group">
-          <button class="btn-secondary" type="button" id="btnCopy">📋 Copy to Clipboard</button>
-          <button class="btn-light" type="button" id="btnRebuild">🧩 Rebuild from Settings</button>
+          <button class="btn-secondary" type="button" id="btnCopy">📋 Copy / コピー</button>
+          <button class="btn-light" type="button" id="btnRebuild">🧩 Rebuild / 再生成</button>
         </div>
 
         <div class="small-text" style="margin-top: 8px;">
-          ※ Copyはこの編集欄の内容をコピーします。<br>
-          ※ Rebuildは左の設定から再生成して、この欄を上書きします。
+          ※ Copy copies the text in this editor. / Copyはこの編集欄の内容をコピーします。<br>
+          ※ Rebuild regenerates from the left settings and overwrites this editor. / Rebuildは左の設定から再生成して、この欄を上書きします。
         </div>
 
-        <h2 style="margin-top: 30px;">📚 プリセット（タップで読み込み / 🗑で削除）</h2>
+        <h2 style="margin-top: 30px;">📚 Presets (tap to load / 🗑 to delete) / プリセット（タップで読み込み / 🗑で削除）</h2>
         <div style="display:flex; gap:10px; flex-wrap:wrap; margin:10px 0 12px 0;">
-          <button class="btn-secondary" type="button" id="btnExportJson">⬇️ JSON Export</button>
-          <button class="btn-secondary" type="button" id="btnImportJson">⬆️ JSON Import</button>
+                    <button class="btn-secondary" type="button" id="btnImportFile">📂 Import / インポート</button>
+          <button class="btn-secondary" type="button" id="btnExportFile">💾 Export / エクスポート</button>
+          <input type="file" id="presetFileInput" accept="application/json" style="display:none;" />
         </div>
-        <div class="preset-list" id="presetList"></div>
+        
+        <div class="preset-search">
+          <input type="text" id="presetSearch" placeholder="Search / 検索（プリセット名・プロンプト）" />
+          <button class="preset-clear" type="button" id="btnPresetSearchClear" title="クリア">×</button>
+        </div>
+<div class="preset-list" id="presetList"></div>
       </div>
     </div>
   </div>
@@ -622,9 +657,9 @@
       <h3 id="jsonModalTitle">Preset JSON</h3>
       <textarea id="jsonTextarea" spellcheck="false" placeholder="ここにJSONが表示されます / ここにJSONを貼り付けてImport"></textarea>
       <div class="modal-actions">
-        <button class="btn-light" type="button" id="btnJsonClose">Close</button>
-        <button class="btn-secondary" type="button" id="btnJsonCopy">Copy</button>
-        <button class="btn-primary" type="button" id="btnJsonApply">Import / Apply</button>
+        <button class="btn-light" type="button" id="btnJsonClose">Close / 閉じる</button>
+        <button class="btn-secondary" type="button" id="btnJsonCopy">Copy / コピー</button>
+        <button class="btn-primary" type="button" id="btnJsonApply">Import / Apply / 反映</button>
       </div>
       <div class="small-text" style="margin-top:8px;">
         ※ Importは「同名なら上書き」して取り込みます。
@@ -640,7 +675,7 @@
         <div class="title">コピーできませんでした（iPhone/Safari対策）</div>
         <div class="desc">出力欄を長押し → 全選択 → コピー を行ってください。今、出力欄を自動で選択状態にしています。</div>
       </div>
-      <button type="button" id="btnCopyHelpClose">閉じる</button>
+      <button type="button" id="btnCopyHelpClose">Close / 閉じる</button>
     </div>
   </div>
 
@@ -1051,7 +1086,42 @@
       return fullPrompt || 'プロンプトを生成するには、少なくともテーマを入力してください。';
     }
 
-    function generatePrompt(opts = {}) {
+    
+    // ===== プリセット用：データからプロンプト文字列を作る（検索用） =====
+    function buildPromptStringFromPreset(preset = {}) {
+      const parts = [];
+
+      const theme = (preset.theme || '').toString().trim();
+      const personTemplate = (preset.personTemplateCustom || preset.personTemplate || '').toString().trim();
+      const composition = (preset.compositionCustom || preset.composition || '').toString().trim();
+      const angle = (preset.angleCustom || preset.angle || '').toString().trim();
+      const lighting = (preset.lightingCustom || preset.lighting || '').toString().trim();
+      const background = (preset.backgroundCustom || preset.background || '').toString().trim();
+
+      if (theme) parts.push(theme);
+      if (personTemplate) parts.push(personTemplate);
+      if (composition) parts.push(composition);
+      if (angle) parts.push(angle);
+      if (lighting) parts.push(lighting);
+      if (background) parts.push(background);
+
+      const prompt = parts.join(', ');
+
+      const params = [];
+      if (preset.ar) params.push(`--ar ${preset.ar}`);
+      if (preset.stylize !== '' && preset.stylize !== null && preset.stylize !== undefined) params.push(`--stylize ${preset.stylize}`);
+      if (preset.chaos && preset.chaos != 0) params.push(`--chaos ${preset.chaos}`);
+      if (preset.quality) params.push(`--quality ${preset.quality}`);
+      if (preset.raw) params.push(`--raw`);
+      if (preset.seed) params.push(`--seed ${preset.seed}`);
+      if (preset.sref) params.push(`--sref ${preset.sref}`);
+      if (preset.cref) params.push(`--cref ${preset.cref}`);
+      if (preset.negative) params.push(preset.negative);
+
+      return prompt + (params.length ? ' ' + params.join(' ') : '');
+    }
+
+function generatePrompt(opts = {}) {
       const { overwriteEditor = true, silentToast = false } = opts;
 
       const fullPrompt = buildPromptString();
@@ -1216,12 +1286,30 @@
       const list = document.getElementById('presetList');
       const presets = loadPresets();
 
+      // 検索（プリセット名・メモ・テーマ・生成プロンプト）
+      const q = (document.getElementById('presetSearch')?.value || '').trim().toLowerCase();
+
       if (!presets.length) {
         list.innerHTML = '<div class="small-text">プリセットがありません</div>';
         return;
       }
 
-      list.innerHTML = presets.map((p, idx) => {
+      // フィルタ（元のindexは保持する）
+      const filtered = presets.map((p, idx) => ({ p, idx })).filter(({ p }) => {
+        if (!q) return true;
+        const name = (p.name || '').toLowerCase();
+        const memo = (p.memo || '').toLowerCase();
+        const theme = (p.theme || '').toLowerCase();
+        const prompt = buildPromptStringFromPreset(p).toLowerCase();
+        return (name + ' ' + memo + ' ' + theme + ' ' + prompt).includes(q);
+      });
+
+      if (!filtered.length) {
+        list.innerHTML = '<div class="small-text">検索結果がありません</div>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(({ p, idx }) => {
         const title = escapeHtml(p.name || '(no name)');
         const memo  = escapeHtml(p.memo || '');
         const snippet = escapeHtml((p.theme || '').slice(0, 60));
@@ -1422,6 +1510,107 @@
       showToast(`インポート完了（${cleaned.length}件）`);
     }
 
+    // ===== JSON File Export / Import =====
+    function exportPresetsToFile() {
+      const data = JSON.stringify(loadPresets(), null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      const ts = new Date();
+      const pad = (n) => String(n).padStart(2,'0');
+      const filename = `mj-presets_${ts.getFullYear()}-${pad(ts.getMonth()+1)}-${pad(ts.getDate())}.json`;
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      setTimeout(() => URL.revokeObjectURL(url), 250);
+      showToast('JSONファイルを書き出しました');
+    }
+
+    function importPresetsFromText(jsonText) {
+      let imported;
+      try {
+        imported = JSON.parse(jsonText);
+      } catch (e) {
+        showToast('JSONの形式が正しくありません', 'error');
+        return;
+      }
+
+      const arr = Array.isArray(imported) ? imported : (Array.isArray(imported?.presets) ? imported.presets : null);
+      if (!arr) {
+        showToast('JSONは配列（[]）または { presets: [] } である必要があります', 'error');
+        return;
+      }
+
+      const cleaned = [];
+      for (const p of arr) {
+        if (!p || typeof p !== 'object') continue;
+        const name = (p.name || '').toString().trim();
+        if (!name) continue;
+
+        cleaned.push({
+          name,
+          memo: (p.memo || '').toString(),
+          theme: (p.theme || '').toString(),
+
+          personTemplate: (p.personTemplate ?? p.person ?? '').toString(),
+          personTemplateCustom: (p.personTemplateCustom ?? p.personCustom ?? '').toString(),
+
+          composition: (p.composition || '').toString(),
+          compositionCustom: (p.compositionCustom || '').toString(),
+
+          angle: (p.angle || '').toString(),
+          angleCustom: (p.angleCustom || '').toString(),
+
+          lighting: (p.lighting || '').toString(),
+          lightingCustom: (p.lightingCustom || '').toString(),
+
+          background: (p.background || '').toString(),
+          backgroundCustom: (p.backgroundCustom || '').toString(),
+
+          ar: (p.ar || '9:16').toString(),
+          arCustom: (p.arCustom || '').toString(),
+
+          stylize: Number.isFinite(+p.stylize) ? +p.stylize : 100,
+          chaos: Number.isFinite(+p.chaos) ? +p.chaos : 0,
+          quality: Number.isFinite(+p.quality) ? +p.quality : 1,
+
+          raw: !!p.raw,
+          rawMode: (p.rawMode || getRawMode()).toString() === 'raw' ? 'raw' : 'style',
+
+          fixedTail: (p.fixedTail || '').toString(),
+          negative: (p.negative || '').toString(),
+          seed: (p.seed || '').toString(),
+          sref: (p.sref || '').toString(),
+          cref: (p.cref || '').toString(),
+        });
+      }
+
+      if (cleaned.length === 0) {
+        showToast('インポートできるプリセットが見つかりませんでした', 'error');
+        return;
+      }
+
+      const existing = loadPresets();
+      const map = new Map(existing.map(p => [p.name, p]));
+      for (const p of cleaned) map.set(p.name, p);
+      const merged = Array.from(map.values());
+
+      savePresets(merged);
+      displayPresets();
+      showToast(`ファイルからインポート完了（${cleaned.length}件）`);
+    }
+
+    function importPresetsFromFile(file) {
+      const reader = new FileReader();
+      reader.onload = () => importPresetsFromText(String(reader.result || ''));
+      reader.onerror = () => showToast('ファイルを読み込めませんでした', 'error');
+      reader.readAsText(file);
+    }
+
     // ===== エディタ保存/復元 =====
     function saveEditorText() {
       const editor = document.getElementById('outputEditor');
@@ -1542,9 +1731,40 @@
       document.getElementById('btnRebuild').addEventListener('click', () => generatePrompt({ overwriteEditor:true }));
       document.getElementById('btnClear').addEventListener('click', clearAll);
 
-      // JSON Export / Import
-      document.getElementById('btnExportJson').addEventListener('click', () => openJsonModal('export'));
-      document.getElementById('btnImportJson').addEventListener('click', () => openJsonModal('import'));
+      // Preset Import / Export
+      const _btnExportJson = document.getElementById('btnExportJson');
+      if (_btnExportJson) _btnExportJson.addEventListener('click', () => openJsonModal('export'));
+      const _btnImportJson = document.getElementById('btnImportJson');
+      if (_btnImportJson) _btnImportJson.addEventListener('click', () => openJsonModal('import'));
+      document.getElementById('btnExportFile').addEventListener('click', exportPresetsToFile);
+      document.getElementById('btnImportFile').addEventListener('click', () => {
+        const input = document.getElementById('presetFileInput');
+        input.value = '';
+        input.click();
+      });
+      document.getElementById('presetFileInput').addEventListener('change', (e) => {
+        const file = e.target && e.target.files ? e.target.files[0] : null;
+        if (!file) return;
+        importPresetsFromFile(file);
+      });
+
+      // プリセット検索（名前＋生成プロンプト）
+      const presetSearch = document.getElementById('presetSearch');
+      const btnPresetSearchClear = document.getElementById('btnPresetSearchClear');
+      if (presetSearch) {
+        presetSearch.addEventListener('input', () => {
+          displayPresets();
+        });
+      }
+      if (btnPresetSearchClear) {
+        btnPresetSearchClear.addEventListener('click', () => {
+          if (!presetSearch) return;
+          presetSearch.value = '';
+          presetSearch.focus();
+          displayPresets();
+        });
+      }
+
       document.getElementById('btnJsonClose').addEventListener('click', closeJsonModal);
       document.getElementById('btnJsonCopy').addEventListener('click', copyJsonFromModal);
       document.getElementById('btnJsonApply').addEventListener('click', applyJsonImport);
