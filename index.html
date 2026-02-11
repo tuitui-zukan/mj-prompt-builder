@@ -401,7 +401,8 @@
       margin: 6px 0 12px 0;
     }
     .preset-search input{
-      flex:1;
+      flex: 1 1 auto;
+      min-width: 0;
       padding: 10px 12px;
       border: 2px solid #e0e0e0;
       border-radius: 10px;
@@ -413,14 +414,37 @@
       border-color:#667eea;
     }
     .preset-clear{
-      width: 40px;
-      height: 40px;
+      flex: 0 0 44px;
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      padding: 0;
       border-radius: 10px;
       border: 2px solid #e0e0e0;
       background: #fff;
       cursor:pointer;
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Mobile fix: keep search input wide and clear button contained */
+    @media (max-width: 600px){
+      .preset-search{
+        gap: 6px;
+      }
+      .preset-search input{
+        padding: 12px 12px;
+        font-size: 1rem;
+      }
+      .preset-clear{
+        flex: 0 0 44px;
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+      }
     }
 </style>
 </head>
